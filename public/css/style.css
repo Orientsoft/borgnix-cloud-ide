@@ -1,0 +1,30 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#editor {
+  /*position: absolute;*/
+  /*width: 500px;*/
+  /*height: 400px;*/
+  height: 600px;
+}
+
+#file-browser {
+  /*width: 50px;*/
+  height: 600px;
+}
+
+.terminal {
+  font-family: monospace;
+  padding: 10px;
+  font-size: 10px !important;
+}
+
+/*#main-container {
+  overflow: hidden;
+}*/
