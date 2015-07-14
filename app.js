@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var multer = require('multer')
+  , fs = require('fs-extra')
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -25,8 +26,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(multer({dest: './uploads'}))
 
-var arduino = require('arduino-compiler/router')(path.join(__dirname, 'node_modules/borgnix-project-manager/temp'))
-  , projects = require('borgnix-project-manager/router')()
+var config = fs.readJsonSync('config/config.json')
+
+var arduino = require('arduino-compiler/router')(config)
+  , projects = require('borgnix-project-manager/router')(config)
 
 app.use('/', routes);
 app.use('/users', users);

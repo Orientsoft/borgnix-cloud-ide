@@ -1,0 +1,7 @@
+{
+  "arduinoDir": "/path/to/arduino/ide",
+  "arduinoMakefileDir": "/path/to/arduino/makefile",
+  "projectRoot": "/path/to/store/user/projects",
+  "uploadDir": "/path/to/store/uploaded/files",
+  "arduinoLibs": "/path/to/public/arduino/libraries"
+}

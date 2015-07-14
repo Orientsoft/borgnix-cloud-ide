@@ -7,7 +7,13 @@ import Terminal from 'es6!js/views/terminal'
 import colors from 'es6!js/lib/colors'
 import Treeview from 'es6!js/views/tree-view'
 import Dropzone from 'es6!js/views/dropzone'
+import BAC from 'es6!bac-client'
 colors.enabled = true
+
+var bac = new BAC({
+  prefix: '/c'
+, host: ''
+})
 
 const ButtonToolbar = ReactBs.ButtonToolbar
     , Button = ReactBs.Button
@@ -50,45 +56,31 @@ var DropzoneDemo = React.createClass({
       return { files: []}
     },
     onDrop: function (files) {
-      console.log('Received files: ', files);
+      console.log('Received files: ', files)
       this.setState({files: files})
     },
 
     onOpenClick: function () {
-      // this.refs.dropzone.open();
-      // console.log(this.refs.dropzone.refs.fileInput)
-      console.log(this.state.files)
       var files = this.state.files
-      var data = new FormData();
+      var data = new FormData()
       $.each(files, function(key, value){
-          data.append(key, value);
-      });
+          data.append(key, value)
+      })
 
-      $.ajax({
-          url: 'c/upload-zip-lib?uuid=uuid&token=token',
-          type: 'POST',
-          data: data,
-          cache: false,
-          dataType: 'json',
-          processData: false, // Don't process the files
-          contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-          success: function(data, textStatus, jqXHR){
-              if(typeof data.error === 'undefined'){
-                  // Success so call function to process the form
-                  // submitForm(event, data);
-                  console.log('good')
-              }
-              else{
-                  // Handle errors here
-                  console.log('ERRORS: ' + data.error);
-              }
-          },
-          error: function(jqXHR, textStatus, errorThrown){
-              // Handle errors here
-              console.log('ERRORS: ' + textStatus);
-              // STOP LOADING SPINNER
-          }
-      });
+      var opt = {
+        uuid: 'uuid'
+      , token: 'token'
+      , data: data
+      }
+
+      bac.uploadZipLib(opt, function (data) {
+        if(typeof data.error === 'undefined'){
+          console.log('good')
+        }
+        else{
+          console.log('ERRORS: ' + data.error)
+        }
+      })
     },
 
     render: function () {
@@ -101,9 +93,9 @@ var DropzoneDemo = React.createClass({
                 Upload
             </button>
           </div>
-      );
+      )
     }
-});
+})
 
 const ArduinoTool = React.createClass({
   render() {
@@ -132,13 +124,10 @@ const ArduinoTool = React.createClass({
 , print() {
     var term = this.refs.output.term
     term.writeln('asdfnqwkbhqwoen:ALISHG')
-    term.writeln('asaoisef:LKJSFasdnas;is:LKASF')
+    term.writeln('asaoisef:LKJSFasdnasis:LKASF')
     term.writeln('*123456789*123456789*123456789*123456789*123456789*123456789*123456789*123456789')
   }
 , componentDidMount() {
-    // console.log(this.refs.output.term)
-    // this.refs.output.editor.getSession().setUseWrapMode(true)
-
     PubSub.subscribe('compile', this.compile)
     PubSub.subscribe('download-hex', this.getHex)
     this.getLibs()
@@ -148,73 +137,52 @@ const ArduinoTool = React.createClass({
     console.log(project)
     var self = this
     self.refs.output.term.writeln('compiling...')
-    $.ajax({
-      url: 'http://127.0.0.1:3000/c/compile'
-    , method: 'POST'
-    , data: {
-        uuid: project.owner
-      , token: 'token'
-      , type: project.type
-      , name: project.name
+
+    var opt = {
+      uuid: project.owner
+    , token: 'token'
+    , type: project.type
+    , name: project.name
+    }
+
+    bac.compile(opt, function (data) {
+      var term = self.refs.output.term
+      if (data.status === 1) {
+        term.writeln(colors.red(data.content.stderr || data.content))
       }
-    , success: function (data) {
-        var term = self.refs.output.term
-        // console.log(data)
-        if (data.status === 1) {
-          // console.log(data.content)
-          term.writeln(colors.red(data.content.stderr || data.content))
-        }
-        else {
-          term.writeln(colors.green(data.content.stdout))
-        }
+      else {
+        term.writeln(colors.green(data.content.stdout))
       }
     })
   }
 , getHex() {
     var project = globalVars.activeProject
-    $.ajax({
-      url: 'http://127.0.0.1:3000/c/findhex'
-    , method: 'GET'
-    , data: {
-        uuid: project.owner
-      , token: 'token'
-      , type: project.type
-      , name: project.name
+
+    var opt = {
+      uuid: project.owner
+    , token: 'token'
+    , type: project.type
+    , name: project.name
+    }
+
+    bac.findHex(opt, function (res) {
+      if (res.status === 0) {
+        $('#dowload-iframe').attr('src', res.url)
       }
-    , success: function (data) {
-        // $('#arduino-output').append(data)
-        if (data === 'yes') {
-          var url = 'http://127.0.0.1:3000/c/hex/'+project.name+'.hex'+'?' + $.param({
-              uuid: project.owner
-            , token: 'token'
-            , type: project.type
-            , name: project.name
-            })
-          $('#dowload-iframe').attr('src', url)
-        }
-        else {
-          $('#arduino-output').append('\nHex file not found\n')
-        }
+      else {
+        $('#arduino-output').append('\nHex file not found\n')
       }
     })
   }
 , getLibs() {
     var self = this
-    $.ajax({
-      url: 'http://127.0.0.1:3000/c/libs'
-    , method: 'GET'
-    , data: {
-        uuid: 'uuid'
-      }
-    , success: function (data) {
-        self.setState({libs: data.content})
-      }
+    bac.listLibs('uuid', function (data) {
+      self.setState({libs: data.content})
     })
   }
+
 , insertHeader(file) {
-    // console.log(a, b, c)
     if (file.indexOf('.h', this.length - '.h'.length) !== -1)
-      // console.log('INSERT', file)
       PubSub.publish('insert_header', file)
   }
 })

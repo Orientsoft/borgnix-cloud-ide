@@ -18,7 +18,7 @@ var ButtonToolbar = ReactBs.ButtonToolbar
   , Input = ReactBs.Input
 
   , bpm = new BPM({
-      host: 'http://127.0.0.1:3000'
+      host: ''
     , prefix: '/p'
     })
 

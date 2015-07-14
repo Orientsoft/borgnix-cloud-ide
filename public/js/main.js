@@ -12,6 +12,7 @@ require.config({
   , pubsub: 'vendor/pubsub-js/pubsub'
   , 'dot-object': 'vendor/dot-object/dot-object'
   , 'bpm-client': 'node_modules/borgnix-project-manager/client'
+  , 'bac-client': 'node_modules/arduino-compiler/client'
   , term: 'node_modules/term.js/src/term'
   , 'react-menus': 'node_modules/react-menus/dist/react-menus'
   , 'bootstrap-contextmenu': 'vendor/bootstrap-contextmenu/bootstrap-contextmenu'
