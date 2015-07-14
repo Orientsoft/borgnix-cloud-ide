@@ -15,6 +15,7 @@ require.config({
   , term: 'node_modules/term.js/src/term'
   , 'react-menus': 'node_modules/react-menus/dist/react-menus'
   , 'bootstrap-contextmenu': 'vendor/bootstrap-contextmenu/bootstrap-contextmenu'
+  // , 'react-dropzone': 'node_modules/react-dropzone/index'
   }
 , shim: {
     term: {

@@ -129,7 +129,7 @@ var Treeview = React.createClass({
                       onTreenodeClick={that.props.onTreenodeClick}
                       onTreenodeContextMenu={that.props.onTreenodeContextMenu}>
               {data.children.map(function (node, i) {
-                  return iter(node, that.props.onTreenodeClick);
+                  return iter(node, that.props.onTreenodeClick, that.props.onTreenodeContextMenu);
               })}
             </Treenode>
           );
@@ -139,12 +139,16 @@ var Treeview = React.createClass({
   }
 });
 
-function iter(node, treenodeClick) {
-  return (<Treenode data={node} onTreenodeClick={treenodeClick}>
-    {node.children.map(function (val) {
+function iter(node, treenodeClick, treenodeContextMenu) {
+  return (
+    <Treenode data={node}
+              onTreenodeClick={treenodeClick}
+              onTreenodeContextMenu={treenodeContextMenu}>
+      {node.children.map(function (val) {
         return iter(val, treenodeClick);
       })}
-  </Treenode>);
+    </Treenode>
+  );
 }
 
 export default Treeview

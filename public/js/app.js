@@ -11,6 +11,8 @@ import globalVars from 'es6!js/lib/global'
 import PubSub from 'pubsub'
 import ArduinoTool from 'es6!js/views/arduino-tool'
 
+
+
 var ButtonToolbar = ReactBs.ButtonToolbar
   , Button = ReactBs.Button
   , Input = ReactBs.Input
@@ -48,25 +50,25 @@ var app = {
     , $('#arduino-tool')[0]
     )
 
-    // React.render(
-    //   <ButtonToolbar>
-    //     <Button>Save</Button>
-    //     <Button>Compile</Button>
-    //     <Button>Download</Button>
-    //   </ButtonToolbar>
-    // , $('#toolbar-container')[0]
-    // )
-
     React.render(
-      <div>
-        <p>点击New按钮新建项目, type填写arduino</p>
-        <p>点击项目名称以切换当前编辑的项目</p>
-        <p>点击save保存对文件的更改</p>
-        <p>点击compile编译当前正在编辑的项目</p>
-        <p>点击.hex下载编译好的hex文件</p>
-      </div>
+      <ButtonToolbar>
+        <Button onClick={this.save}>Save</Button>
+        <Button onClick={this.compile}>Compile</Button>
+        <Button onClick={this.downloadHex}>Download</Button>
+      </ButtonToolbar>
     , $('#toolbar-container')[0]
     )
+
+    // React.render(
+    //   <div>
+    //     <p>点击New按钮新建项目, type填写arduino</p>
+    //     <p>点击项目名称以切换当前编辑的项目</p>
+    //     <p>点击save保存对文件的更改</p>
+    //     <p>点击compile编译当前正在编辑的项目</p>
+    //     <p>点击.hex下载编译好的hex文件</p>
+    //   </div>
+    // , $('#toolbar-container')[0]
+    // )
 
     bpm.listProject(opt, function (data) {
       console.log(data)
@@ -112,6 +114,31 @@ var app = {
         PubSub.publish('file_browser_load_test', globalVars.projects)
       })
     })
+
+    PubSub.subscribe('create_new_file', function (topic, opt) {
+      bpm.saveFiles(opt, function (data) {
+        console.log(data)
+      })
+    })
+
+    PubSub.subscribe('delete_file', function (topic, opt) {
+      console.log('get', opt)
+      bpm.deleteFiles(opt, function (data) {
+        console.log(data)
+      })
+    })
+  }
+
+, save: function () {
+    PubSub.publish('start_save_files')
+  }
+
+, compile: function () {
+    PubSub.publish('compile')
+  }
+
+, downloadHex: function () {
+    PubSub.publish('download-hex')
   }
 }
 

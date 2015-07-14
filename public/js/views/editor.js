@@ -35,10 +35,19 @@ var Editor = React.createClass ({
 
 , componentDidMount() {
     var self = this
+
     PubSub.subscribe('editor_load_'+this.props.name, function (topic, project) {
       console.log(topic, project)
       self.setState({project: project})
       globalVars.activeProject = project
+    })
+
+    PubSub.subscribe('start_save_files', function () {
+      self.save()
+    })
+
+    PubSub.subscribe('insert_header', function (topic, header) {
+      self.insertHeader(header)
     })
   }
 
@@ -47,7 +56,7 @@ var Editor = React.createClass ({
 
     return (
       <div>
-      <TabbedArea defaultActiveKey={1}>
+      <TabbedArea defaultActiveKey={1} ref='editor-tabs'>
         {this.state.project.files.map(function (file, i) {
           return (
             <TabPane eventKey={i+1} tab={file.name}>
@@ -61,9 +70,6 @@ var Editor = React.createClass ({
           )
         }, [])}
       </TabbedArea>
-      <ButtonToolbar>
-        <Button onClick={this.save}>Save</Button>
-      </ButtonToolbar>
       </div>
     )
   }
@@ -74,11 +80,25 @@ var Editor = React.createClass ({
     }
     // console.log(this.state.project)
     PubSub.publish('save_files', this.state.project)
-
   }
 
 , getCode() {
     console.log(this.props.children)
+  }
+
+, insertHeader(header) {
+    console.log('IN EDITOR', header)
+    // var oldCursorPos = this.edi
+    var tab = 'tab-' + (this.refs['editor-tabs'].state.activeKey - 1)
+    var editor = this.refs[tab].editor
+    var oldCursorPos = editor.getCursorPosition()
+    oldCursorPos.row++
+    editor.moveCursorTo(0, 0)
+    editor.clearSelection()
+    editor.insert('#include<'+header+'>\n')
+    editor.moveCursorTo(oldCursorPos)
+
+    // console.log(oldCursorPos)
   }
 })
 

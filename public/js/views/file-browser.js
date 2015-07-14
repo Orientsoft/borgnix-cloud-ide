@@ -121,14 +121,32 @@ const FileBrowser = React.createClass({
 
         <Modal show={this.state.showTreenodeEditModal} onHide={this.closeTreenodeEditModal}>
           <Modal.Header closeButton>
-            <Modal.Title>Project: {this.state.selectedNode}</Modal.Title>
+            <Modal.Title>Project: {this.state.selectedNode ? this.state.selectedNode.id : ''}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-
+            {function (self) {
+              if (!self.state.selectedNode) return ''
+              if (self.state.selectedNode.children.length > 0)
+                return (
+                  <Input type='text'
+                       label='file name'
+                       id='new-file-name'
+                       buttonAfter={
+                         <Button onClick={self.createNewFile}>Create</Button>
+                       }></Input>
+                 )
+            }(this)}
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.closeTreenodeEditModal}>Cancle</Button>
-            <Button onClick={this.deleteProject}>Delete</Button>
+            <Button onClick={function(self) { return function () {
+              if (self.state.selectedNode) {
+                if (self.state.selectedNode.children.length > 0)
+                  self.deleteProject()
+                else
+                  self.deleteFile(self.state.selectedNode.id)
+              }
+            }}(this)}>Delete</Button>
           </Modal.Footer>
         </Modal>
       </div>
@@ -169,7 +187,7 @@ const FileBrowser = React.createClass({
   }
 , showTreenodeEditModal(e, rid, node) {
     e.preventDefault()
-    this.setState({showTreenodeEditModal: true, selectedNode: node.id})
+    this.setState({showTreenodeEditModal: true, selectedNode: node})
   }
 , closeTreenodeEditModal() {
     this.setState({showTreenodeEditModal: false})
@@ -183,6 +201,37 @@ const FileBrowser = React.createClass({
     , name: globalVars.activeProject.name
     }
     PubSub.publish('delete_project', opt)
+  }
+, createNewFile() {
+    var filename = $('#new-file-name').val()
+    console.log(filename)
+    var opt = {
+      uuid: 'uuid'
+    , token: 'token'
+    , type: globalVars.activeProject.type
+    , name: globalVars.activeProject.name
+    , files: [
+        { name: filename, content: ''}
+      ]
+    }
+    globalVars.activeProject.files.push({name: filename, content: ''})
+    PubSub.publish('create_new_file', opt)
+  }
+, deleteFile(filename) {
+    console.log(filename)
+    var opt = {
+      uuid: 'uuid'
+    , token: 'token'
+    , type: 'arduino'
+    , name: filename.split('/')[0]
+    }
+
+    var root = filename.slice(filename.indexOf('/'), filename.lastIndexOf('/'))
+    opt.files = [
+      {name: filename.slice(filename.lastIndexOf('/')+1), root: root}
+    ]
+    console.log(opt)
+    PubSub.publish('delete_file', opt)
   }
 })
 
