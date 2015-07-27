@@ -1,6 +1,10 @@
 import React from 'react'
+import pubsub from 'pubsub-js'
+
+
 import ThemeManager from './theme'
 import { IconButton } from 'material-ui'
+import MIconButton from './material-icon-button'
 
 class Toolbar extends React.Component {
   constructor(props) {
@@ -13,7 +17,23 @@ class Toolbar extends React.Component {
   render() {
     return (
       <div className='toolbar'>
-        <IconButton iconClassName='material-icons'>add</IconButton>
+        <MIconButton icon='add'
+            onTouchTap={()=>{
+              pubsub.publish('new_project')
+            }}/>
+        <MIconButton
+            icon='save'
+            onTouchTap={()=>{
+              pubsub.publish('editor_save_all_files')
+            }}/>
+        <MIconButton icon='build'
+            onTouchTap={()=>{
+              pubsub.publish('compile')
+            }}/>
+        <MIconButton icon='file_download'
+            onTouchTap={()=>{
+              pubsub.publish('download_hex')
+            }}/>
       </div>
     )
   }

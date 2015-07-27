@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "nod ./bin/www"
   },
   "dependencies": {
     "arduino-compiler": "git+https://github.com/Orientsoft/borgnix-arduino-compiler.git",

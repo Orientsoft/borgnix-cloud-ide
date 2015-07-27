@@ -30,7 +30,7 @@ class TerminalComponent extends React.Component {
     $(window).resize(function () {
       self.resize()
     })
-    this.term.write('terminal id: '+this.props.id.toString())
+    // this.term.write('terminal id: '+this.props.id.toString())
 
     pubsub.subscribe('console_output_'+this.props.id, function (topic, data) {
       self.term.writeln(data)

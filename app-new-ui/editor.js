@@ -2,6 +2,7 @@ import React from 'react'
 import _ from 'underscore'
 import AceEditor from 'react-ace'
 import $ from 'jquery'
+import pubsub from 'pubsub-js'
 
 
 import 'brace/theme/twilight'
@@ -16,14 +17,17 @@ class Editor extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      files: [{name: 'a', content:''}]
+      files: []
     }
   }
 
   render() {
     return (
       <div {...this.props}>
-        <Tabs tabWidth={150}  tabItemContainerStyle={{width: 150 * this.state.files.length}}>
+        <Tabs
+            tabWidth={150}
+            ref='tabs'
+            tabItemContainerStyle={{width: 150 * this.state.files.length}}>
           {
             this._getTabs()
           }
@@ -33,7 +37,6 @@ class Editor extends React.Component {
   }
 
   componentDidMount() {
-
     let self = this
 
     this.resize(true)
@@ -41,6 +44,31 @@ class Editor extends React.Component {
 
     $(window).resize(()=>{
       self.resize(true)
+    })
+
+    pubsub.subscribe('editor_save_all_files', (topic, data)=>{
+      this.saveAllFiles()
+    })
+
+    pubsub.subscribe('show_file', (topic, file)=>{
+      let idx = _.findIndex(this.state.files, {name: file.name})
+      if (idx !== -1) {
+        console.log(this.refs.tabs.state)
+        this.refs.tabs.setState({
+          selectedIndex: idx
+        })
+      }
+      else {
+        this.addFile(file)
+      }
+    })
+
+    pubsub.subscribe('remove_file', this.removeFile.bind(this))
+
+    pubsub.subscribe('clear_files', ()=> {
+      this.setState({
+        files: []
+      })
     })
   }
 
@@ -57,6 +85,41 @@ class Editor extends React.Component {
     this.setState({
       files: this.state.files.concat([file])
     })
+    let idx = _.findIndex(this.state.files, {name: file.name})
+    if (idx !== -1) {
+      this.refs.tabs.setState({
+        selectedIndex: idx
+      })
+    }
+  }
+
+  removeFile(topic, target) {
+    this.setState({
+      files: this.state.files.filter((file)=>{
+        return (target.root !== file.root || target.name !== file.name)
+      })
+    })
+  }
+
+  saveAllFiles() {
+    // console.log(this.state.files)
+    let self = this
+    let filesToSave = _.keys(this.refs)
+          .filter((name)=>{
+            return name.startsWith('tab-')
+          })
+          .reduce((files, name)=>{
+            let file = _.clone(self.refs[name].props.file)
+              , newContent = self.refs[name].editor.getValue()
+
+            if (newContent !== file.content) {
+              file.content = self.refs[name].editor.getValue()
+              files.push(file)
+            }
+            return files
+          }, [])
+    // console.log(filesToSave)
+    pubsub.publish('save_files', filesToSave)
   }
 
   resize() {
@@ -81,7 +144,11 @@ class Editor extends React.Component {
     console.log('getting tabs')
     let tabs = this.state.files.map((file, i)=>{
       return (
-        <Tab label={file.name}>
+        <Tab label={file.name}
+            onContextMenu={(e)=>{
+              e.preventDefault()
+              console.log(this, e)
+            }}>
           <AceEditor mode={getMode(file.name)}
                      style={{width: '100%', height: 200}}
                      theme='twilight'

@@ -18,9 +18,9 @@ class App extends React.Component {
   componentDidMount() {
     let self = this
 
-    pubsub.subscribe('add_file', (topic, data)=>{
-      self.refs.editor.addFile(data)
-    })
+    // pubsub.subscribe('add_file', (topic, data)=>{
+    //   self.refs.editor.addFile(data)
+    // })
   }
 
   render() {

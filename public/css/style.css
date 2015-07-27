@@ -44,6 +44,7 @@
   font-size: 12px !important;
   background-color: black !important;
   height: 200px;
+  overflow: hidden;
   /*position: fixed;*/
 }
 
