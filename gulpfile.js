@@ -1,43 +1,48 @@
 var gulp = require('gulp')
-  , path = require('path')
-  , fs = require('fs-extra')
-
-require('shelljs/global')
+  , browserify = require('browserify')
+  , babelify = require('babelify')
+  , watchify = require('watchify')
+  , source = require('vinyl-source-stream')
+  , concat = require('gulp-concat')
 
 gulp.task('install', function () {
-  exec('bower install')
-  exec('node_modules/.bin/bower-installer')
-  ln('-s'
-    , path.join(__dirname, 'node_modules')
-    , path.join(__dirname, 'public/node_modules'))
-  if (!fs.existsSync(path.join(__dirname, 'config/config.json')))
-    cp('config/default.json', 'config/config.json')
-  cp('-r', 'bower_components/bootstrap/fonts', 'public/vendor')
+  gulp.src([
+    './node_modules/bootstrap/dist/**'
+  ])
+    .pipe(gulp.dest('./public/vendor/bootstrap'))
 })
 
-gulp.task('dev-install', function () {
-  var bpmPath = path.join( __dirname, 'node_modules/borgnix-project-manager')
-  fs.removeSync(bpmPath)
-  var bpmDevPath = path.join(__dirname, '../borgnix-project-manager')
-  if (fs.existsSync(bpmDevPath))
-    ln('-s', bpmDevPath, bpmPath)
+gulp.task('browserify', function () {
+  var bundler = browserify({
+    entries: ['./app-new-ui/main.js']
+  , transform: [babelify]
+  , debug: true
+  , cache: {}
+  , packageCache: {}
+  , fullPaths: true
+  })
 
-  var bacPath = path.join( __dirname, 'node_modules/arduino-compiler')
-  fs.removeSync(bacPath)
-  var bacDevPath = path.join(__dirname, '../borgnix-arduino-compiler')
-  if (fs.existsSync(bacDevPath))
-    ln('-s', bacDevPath, bacPath)
+  var watcher = watchify(bundler)
+
+  return watcher
+    .on('update', function () { // When any files update
+        var updateStart = Date.now()
+        console.log('Updating!')
+        watcher.bundle()// Create new bundle that uses the cache for high performance
+        .on('error', function (err) {
+          console.error(err.stack)
+        })
+        .pipe(source('main.js'))
+    // This is where you add uglifying etc.
+        .pipe(gulp.dest('./public/build/'))
+        console.log('Updated!', (Date.now() - updateStart) + 'ms')
+    })
+    .bundle() // Create the initial bundle when starting the task
+    .on('error', function (err) {
+      console.error(err.stack || err)
+    })
+    .pipe(source('main.js'))
+    .pipe(gulp.dest('./public/build/'))
 })
 
-gulp.task('production-install', function () {
-  exec('npm i git+https://github.com/Orientsoft/borgnix-project-manager.git')
-  exec('npm i git+https://github.com/Orientsoft/borgnix-arduino-compiler.git')
-})
-
-gulp.task('clean:installation', function () {
-  rm('-rf', ['public/vendor', 'public/node_modules', 'node_modules', 'bower_components'])
-})
-
-gulp.task('clean:uploads', function () {
-  fs.emptyDirSync('uploads')
-})
+gulp.task('default', ['browserify'])

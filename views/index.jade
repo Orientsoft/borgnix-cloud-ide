@@ -2,17 +2,20 @@ extends layout
 
 block css
   link(rel='stylesheet' href='/css/style.css')
-  link(rel='stylesheet' href='/vendor/bootstrap/bootstrap.min.css')
-  link(rel='stylesheet' href='/node_modules/react-treeview-component/build/react-tree.min.css')
+  link(rel='stylesheet' href='/vendor/bootstrap/css/bootstrap.min.css')
+  //- link(rel='stylesheet' href='/node_modules/react-treeview-component/build/react-tree.min.css')
+  //- link(rel='stylesheet' href='/node_modules/react-select/dist/default.css')
 
 block content
-  #main-container.row.container-fluid
-    #file-browser.col-xs-2
-    #editor.col-xs-6
-    #arduino-tool.col-xs-4
-  #toolbar-container.container-fluid
-  #auth-container.container-fluid
-  iframe#dowload-iframe(style={display: 'none'})
-  
+  //- #test-container
+  //- #editor-container.container-fluid
+  //-   #project-manager.col-sm-4
+  //-   #editor.col-sm-8
+  //- #console-container.container-fluid
+  //-   #toolbar.row
+  //-   #terminal.row
+  //- #auth-container.container-fluid
+  //- iframe#dowload-iframe(style={display: 'none'})
+    
 block js
-  script(src='vendor/requirejs/require.js' data-main='js/main.js')
+  script(src='build/main.js')
