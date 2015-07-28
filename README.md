@@ -46,6 +46,16 @@ Open `config/config.json`, replace the default values with your actual settings.
 4. *uploadDir*: the directory to store files uploaded by users.
 5. *arduinoLibs*: the directory to store libraries shared by all users.
 
+## USAGE
+
+To start the server, run:
+
+```bash
+npm start
+```
+
+Then open `http://127.0.0.1:3000` in your browser to use the client.
+
 ## TODO and Known Issues
 
 1. Improve UI design and details

@@ -103,6 +103,31 @@ function deleteProjectDialog() {
   )
 }
 
+function libsDialog() {
+  this._getLibTree('user')
+  this._getLibTree('ide')
+  return (
+    <Dialog
+        ref='libsDialog'
+        contentStyle={{height: 500}}
+        // autoDetectWindowHeight={true}
+        autoScrollBodyContent={true}
+        title='Libraries'
+        actions={[
+          {text: 'Close'}
+        ]}>
+      <List>
+        <ListItem primaryText='IDE Libs'>
+          { this._getLibTree('ide') }
+        </ListItem>
+        <ListItem primaryText='User Libs'>
+          { this._getLibTree('user') }
+        </ListItem>
+      </List>
+    </Dialog>
+  )
+}
+
 class ProjectManager extends React.Component {
   constructor(props) {
     super(props)
@@ -110,28 +135,40 @@ class ProjectManager extends React.Component {
       projects: []
     , selectedProject: null
     , snackbarMsg: 'File Saved'
+    , libs: {
+        userLibs: []
+      , ideLibs: []
+      }
     }
   }
 
   render() {
     return (
       <div {...this.props}>
-        <SelectField
-            ref='project'
-            floatingLabelText='project'
-            value={this.state.selectedProject}
-            valueMember='name'
-            displayMember='name'
-            onChange={this._handleSelectFieldChange.bind(this, 'selectedProject')}
-            menuItems={this.state.projects}/>
-        <IconMenu iconButtonElement={<MIconButton icon='more_vert'/>}>
-          <MenuItem
-              primaryText='New File'
-              onTouchTap={()=>{this.refs.newFileDialog.show()}}/>
-          <MenuItem
-              primaryText='Delete'
-              onTouchTap={()=>{this.refs.deleteProjectDialog.show()}}/>
-        </IconMenu>
+        <div className='row'>
+          <div className='col-sm-10' style={{paddingLeft: 25, paddingRight: 0}}>
+          <SelectField
+              ref='project'
+              floatingLabelText='project'
+              value={this.state.selectedProject}
+              valueMember='name'
+              displayMember='name'
+              onChange={this._handleSelectFieldChange.bind(this, 'selectedProject')}
+              menuItems={this.state.projects}/>
+          </div>
+          <div className='col-sm-2' style={{padding: 0, paddingTop: 15}}>
+          <IconMenu iconButtonElement={<MIconButton icon='more_vert'/>}>
+            <MenuItem
+                primaryText='New File'
+                onTouchTap={()=>{this.refs.newFileDialog.show()}}/>
+            <MenuItem
+                primaryText='Delete'
+                onTouchTap={()=>{this.refs.deleteProjectDialog.show()}}/>
+          </IconMenu>
+          </div>
+        </div>
+
+
 
         <List style={{backgroundColor: '#757575'}}>
           {this._getFileTree()}
@@ -145,12 +182,20 @@ class ProjectManager extends React.Component {
         { newProjectDialog.bind(this)() }
         { newFileDialog.bind(this)() }
         { deleteProjectDialog.bind(this)() }
+        { libsDialog.bind(this)() }
       </div>
     )
   }
 
   componentDidMount() {
     this._updateProjects()
+
+    bac.listLibs('uuid', (data)=>{
+      // console.log('libs', data)
+      this.setState({
+        libs: data.content
+      })
+    })
 
     let handlers = {
       'save_files': this._saveFiles.bind(this)
@@ -159,6 +204,7 @@ class ProjectManager extends React.Component {
     , 'new_project': this.refs.newProjectDialog.show.bind(this)
     , 'new_file': this._createNewFile.bind(this)
     , 'delete_file': this._deleteFile.bind(this)
+    , 'open_libs_dialog': this.refs.libsDialog.show.bind(this)
     }
 
     _.map(handlers, (cb, topic)=>{
@@ -214,23 +260,22 @@ class ProjectManager extends React.Component {
   _deleteProject(opt) {
     bpm.deleteProject(opt, ()=>{
       console.log('deleted', opt.name)
+      let nextProject = _.find(this.state.projects, (project)=>{
+        return project.name !== opt.name
+      })
       this.setState({
         projects: this.state.projects.filter((project)=>{
           return project.name !== opt.name
         })
-      , selectedProject: _.find(this.state.projects, (project)=>{
-          return project.name !== opt.name
-        }).name
+      , selectedProject: nextProject.name
       })
       pubsub.publish('clear_files')
-      this._showProject(_.find(this.state.projects, (project)=>{
-        return project.name !== opt.name
-      }))
+      this._showProject(nextProject)
       this.refs.deleteProjectDialog.dismiss()
     })
   }
 
-  _downloadHex() {
+  _downloadHex(topic, board) {
     let project = this.getSelectedProject()
       , self = this
 
@@ -239,6 +284,7 @@ class ProjectManager extends React.Component {
     , token: 'token'
     , type: project.type
     , name: project.name
+    , board: board
     }
 
     bac.findHex(opts, function (res) {
@@ -258,7 +304,7 @@ class ProjectManager extends React.Component {
     })
   }
 
-  _compileProject() {
+  _compileProject(topic, board) {
     switch (this.props.type) {
     case 'arduino':
       let opts = {
@@ -266,6 +312,7 @@ class ProjectManager extends React.Component {
       , token: 'token'
       , type: 'arduino'
       , name: this.getSelectedProject().name
+      , board: board
       }
       bac.compile(opts, (data)=>{
         if (data.status === 0)
@@ -389,6 +436,29 @@ class ProjectManager extends React.Component {
             primaryText={file.name}/>
       )
     })
+  }
+
+  _getLibTree(type) {
+    let libs = (type === 'user' ? this.state.libs.userLibs : this.state.libs.ideLibs)
+    console.log(libs)
+    return libs.map((lib)=>{
+      return (
+        <ListItem primaryText={lib.name}>
+          {lib.headers.map((header)=>{
+            return (
+              <ListItem
+                  primaryText={header}
+                  leftIcon={<FontIcon className='material-icons'>description</FontIcon>}
+                  onTouchTap={this._insertHeader.bind(this, header)}/>
+            )
+          })}
+        </ListItem>
+      )
+    })
+  }
+
+  _insertHeader(filename) {
+    pubsub.publish('insert_header', filename)
   }
 
   _handleSelectFieldChange(key, e) {

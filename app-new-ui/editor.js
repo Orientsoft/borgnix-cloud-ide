@@ -65,12 +65,11 @@ class Editor extends React.Component {
 
     pubsub.subscribe('show_file', (topic, file)=>{
       let idx = _.findIndex(this.state.files, {name: file.name})
-      if (idx !== -1) {
-        console.log(this.refs.tabs.state)
+      if (idx !== -1)
         this.refs.tabs.setState({
           selectedIndex: idx
         })
-      }
+
       else
         this.addFile(file)
     })
@@ -93,6 +92,10 @@ class Editor extends React.Component {
         files: []
       })
     })
+
+    pubsub.subscribe('insert_header', (topic, filename)=>{
+      this.insertHeader(filename)
+    })
   }
 
   componentDidUpdate() {
@@ -102,6 +105,16 @@ class Editor extends React.Component {
 
   componentWillUnmount() {
     $(window).unbind('resize')
+  }
+
+  insertHeader(filename) {
+    let editor = this.refs['tab-' + this.refs.tabs.state.selectedIndex].editor
+      , oldCursorPos = editor.getCursorPosition()
+    oldCursorPos.row++
+    editor.moveCursorTo(0, 0)
+    editor.clearSelection()
+    editor.insert('#include<' + filename + '>\n')
+    editor.moveCursorTo(oldCursorPos)
   }
 
   addFile(file) {
@@ -120,6 +133,9 @@ class Editor extends React.Component {
       files: this.state.files.filter((file)=>{
         return (target.root !== file.root || target.name !== file.name)
       })
+    })
+    this.refs.tabs.setState({
+      selectedIndex: 0
     })
   }
 
@@ -163,7 +179,6 @@ class Editor extends React.Component {
   }
 
   _getTabs() {
-    console.log('getting tabs')
     let tabs = this.state.files.map((file, i)=>{
       return (
         <Tab label={file.name}

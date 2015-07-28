@@ -2,7 +2,8 @@ import React from 'react'
 import pubsub from 'pubsub-js'
 
 import ThemeManager from './theme'
-// import { IconButton } from 'material-ui'
+import BoardSelect from './board-select'
+// import { SelectField } from 'material-ui'
 import MIconButton from './material-icon-button'
 
 class Toolbar extends React.Component {
@@ -20,6 +21,7 @@ class Toolbar extends React.Component {
     }
     return (
       <div className='toolbar'>
+        <div style={{float: 'right', paddingTop: 20}}>
         <MIconButton icon='add'
             tooltipPosition='bottom-right'
             tooltipStyles={tooltipStyles}
@@ -43,20 +45,31 @@ class Toolbar extends React.Component {
             onTouchTap={()=>{
               pubsub.publish('delete_current_file')
             }}/>
+        <MIconButton
+            icon='library_books'
+            tooltipPosition='bottom-right'
+            tooltipStyles={tooltipStyles}
+            tooltip='Add Library'
+            onTouchTap={()=>{
+              pubsub.publish('open_libs_dialog')
+            }}/>
         <MIconButton icon='build'
             tooltipPosition='bottom-right'
             tooltipStyles={tooltipStyles}
             tooltip='Compile'
             onTouchTap={()=>{
-              pubsub.publish('compile')
+              console.log('board', this.refs.boardSelect.state.selectedBoard)
+              pubsub.publish('compile', this.refs.boardSelect.state.selectedBoard)
             }}/>
         <MIconButton icon='file_download'
             tooltipPosition='bottom-right'
             tooltipStyles={tooltipStyles}
             tooltip='Download Hex File'
             onTouchTap={()=>{
-              pubsub.publish('download_hex')
+              pubsub.publish('download_hex', this.refs.boardSelect.state.selectedBoard)
             }}/>
+        </div>
+        <BoardSelect ref='boardSelect' style={{paddingLeft: 20, zIndex: 9999}}/>
       </div>
     )
   }
