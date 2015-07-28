@@ -23,6 +23,86 @@ let bac = new BAC({
 , prefix: '/c'
 })
 
+function newProjectDialog() {
+  return (
+    <Dialog
+        ref='newProjectDialog'
+        title='New Project'
+        actions={[
+          { text: 'Cancel'}
+        , { text: 'Create'
+          , onTouchTap: ()=>{
+              let opts = {
+                uuid: 'uuid'
+              , token: 'token'
+              , type: this.props.type
+              , name: this.refs.newProjectName.getValue()
+              }
+              bpm.newProject(opts, (data)=>{
+                this.setState({
+                  projects: this.state.projects.concat([data])
+                , selectedProject: data.name
+                })
+                pubsub.publish('clear_files')
+                this._showProject(data)
+                this.refs.newProjectDialog.dismiss()
+              })
+            }
+          }
+        ]}>
+      <TextField ref='newProjectName' floatingLabelText='Name'/>
+    </Dialog>
+  )
+}
+
+function newFileDialog() {
+  return (
+    <Dialog
+        title='New File'
+        ref='newFileDialog'
+        actions={[
+          { text: 'Cancel' }
+        , { text: 'Create'
+          , onTouchTap: ()=>{
+              // console.log(this)
+              let filename = this.refs.newFileName.getValue()
+              this._createNewFile([filename], ()=>{
+                this.refs.newFileDialog.dismiss()
+              })
+            }
+          }
+        ]}>
+      <TextField
+          ref='newFileName'
+          floatingLabelText='File Name'/>
+    </Dialog>
+  )
+}
+
+function deleteProjectDialog() {
+  return (
+    <Dialog
+        title='Comfirm Delete'
+        ref='deleteProjectDialog'
+        actions={[
+          { text: 'Cancel' }
+        , { text: 'Delete'
+          , onTouchTap: ()=>{
+              let opt = {
+                uuid: 'uuid'
+              , token: 'token'
+              , type: this.props.type
+              , name: this.getSelectedProject().name
+              }
+              this._deleteProject(opt)
+            }
+          }
+        ]}>
+      Are you sure to delete the project?
+    </Dialog>
+  )
+}
+
 class ProjectManager extends React.Component {
   constructor(props) {
     super(props)
@@ -45,8 +125,12 @@ class ProjectManager extends React.Component {
             onChange={this._handleSelectFieldChange.bind(this, 'selectedProject')}
             menuItems={this.state.projects}/>
         <IconMenu iconButtonElement={<MIconButton icon='more_vert'/>}>
-          <MenuItem primaryText='New File'/>
-          <MenuItem primaryText='Delete'/>
+          <MenuItem
+              primaryText='New File'
+              onTouchTap={()=>{this.refs.newFileDialog.show()}}/>
+          <MenuItem
+              primaryText='Delete'
+              onTouchTap={()=>{this.refs.deleteProjectDialog.show()}}/>
         </IconMenu>
 
         <List style={{backgroundColor: '#757575'}}>
@@ -58,76 +142,95 @@ class ProjectManager extends React.Component {
             ref='snackbar'
             message={this.state.snackbarMsg}
             autoHideDuration={1500}/>
-        <Dialog
-            ref='newProjectDialog'
-            title='New Project'
-            actions={[
-              { text: 'Cancel'}
-            , { text: 'Create'
-              , onTouchTap: ()=>{
-                  let opts = {
-                    uuid: 'uuid'
-                  , token: 'token'
-                  , type: this.props.type
-                  , name: this.refs.newProjectName.getValue()
-                  }
-                  // console.log(opts)
-                  bpm.newProject(opts, (data)=>{
-                    // console.log(data)
-                    this.setState({
-                      projects: this.state.projects.concat([data])
-                    })
-                  })
-                }
-              }
-            ]}>
-          <TextField ref='newProjectName' floatingLabelText='Name'/>
-        </Dialog>
+        { newProjectDialog.bind(this)() }
+        { newFileDialog.bind(this)() }
+        { deleteProjectDialog.bind(this)() }
       </div>
     )
   }
 
   componentDidMount() {
-    let self = this
+    this._updateProjects()
 
-    let opts = {
-      uuid: 'uuid'
-    , token: 'token'
-    , type: this.props.type
+    let handlers = {
+      'save_files': this._saveFiles.bind(this)
+    , 'compile': this._compileProject.bind(this)
+    , 'download_hex': this._downloadHex.bind(this)
+    , 'new_project': this.refs.newProjectDialog.show.bind(this)
+    , 'new_file': this._createNewFile.bind(this)
+    , 'delete_file': this._deleteFile.bind(this)
     }
 
-    bpm.listProject(opts, (data)=>{
-      this.setState({
-        projects: data.map((project)=>{
-          project.files = project.files.map((file)=>{
-            file.open=false
-            return file
-          })
-          return project
-        })
-      , selectedProject: this.state.selectedProject || data[0].name
-      })
-      let selectedProject = this.getSelectedProject()
-      if (selectedProject.type === 'arduino') {
-        let mainFile = _.find(selectedProject.files, (file)=>{
-          return file.name === selectedProject.name + '.ino'
-        })
-        pubsub.publish('show_file', mainFile)
-        this._changeFileOpenStatus(selectedProject.name, mainFile.name)
-      }
+    _.map(handlers, (cb, topic)=>{
+      pubsub.subscribe(topic, cb)
     })
-
-    pubsub.subscribe('save_files', this._saveFiles.bind(this))
-    pubsub.subscribe('compile', this._compileProject.bind(this))
-    pubsub.subscribe('download_hex', this._downloadHex.bind(this))
-    pubsub.subscribe('new_project', ()=>{this.refs.newProjectDialog.show()}.bind(this))
   }
 
   getSelectedProject() {
     return _.find(this.state.projects, {name: this.state.selectedProject})
   }
 
-  _downloadHex(topic, data) {
+  _updateProjects() {
+    let opts = {
+      uuid: 'uuid'
+    , token: 'token'
+    , type: this.props.type
+    }
+    bpm.listProject(opts, (data)=>{
+      this.setState({
+        projects: data.map((project)=>{
+          project.files = project.files.map((file)=>{
+            file.open = false
+            return file
+          })
+          return project
+        })
+      , selectedProject: this.state.selectedProject || data[0].name
+      })
+
+      this._showProject(this.getSelectedProject())
+    })
+  }
+
+  _showProject(project) {
+    let count = 0
+
+    project.files.map((file)=>{
+      if (file.open) {
+        pubsub.publish('show_file', file)
+        count++
+      }
+    })
+
+    if (count === 0)
+      switch (project.type) {
+      case 'arduino':
+        pubsub.publish('show_file', _.find(project.files, {name: project.name + '.ino'}))
+        this._changeFileOpenStatus(project.name, project.name + '.ino')
+        break
+      }
+  }
+
+  _deleteProject(opt) {
+    bpm.deleteProject(opt, ()=>{
+      console.log('deleted', opt.name)
+      this.setState({
+        projects: this.state.projects.filter((project)=>{
+          return project.name !== opt.name
+        })
+      , selectedProject: _.find(this.state.projects, (project)=>{
+          return project.name !== opt.name
+        }).name
+      })
+      pubsub.publish('clear_files')
+      this._showProject(_.find(this.state.projects, (project)=>{
+        return project.name !== opt.name
+      }))
+      this.refs.deleteProjectDialog.dismiss()
+    })
+  }
+
+  _downloadHex() {
     let project = this.getSelectedProject()
       , self = this
 
@@ -139,12 +242,19 @@ class ProjectManager extends React.Component {
     }
 
     bac.findHex(opts, function (res) {
-      if (res.status === 0) {
+      if (res.status === 0)
         React.findDOMNode(self.refs.downloadIframe).src = res.url
-      }
-      else {
+      else
         pubsub.publish('console_output_compile', '\nHex file not found\n')
-      }
+    })
+  }
+
+  _createNewProject(topic, opts) {
+    bpm.newProject(opts, (res)=>{
+      this.setState({
+        projects: this.state.projects.concat([res])
+      })
+      this.refs.newProjectDialog.dismiss()
     })
   }
 
@@ -158,16 +268,60 @@ class ProjectManager extends React.Component {
       , name: this.getSelectedProject().name
       }
       bac.compile(opts, (data)=>{
-        if (data.status === 0) {
+        if (data.status === 0)
           pubsub.publish( 'console_output_compile'
                         , colors.green('\n' + data.content.stdout))
-        }
-        else {
+        else
           pubsub.publish( 'console_output_compile'
                         , colors.red('\n' + data.content.stderr))
-        }
       })
     }
+  }
+
+  _deleteFile(topic, currentFile) {
+    let opt = {
+      uuid: 'uuid'
+    , token: 'token'
+    , type: this.props.type
+    , name: this.state.selectedProject
+    , files: [currentFile]
+    }
+
+    this.setState({
+      projects: this.state.projects.map((project)=>{
+        if (project.name === opt.name)
+          project.files = project.files.filter((file)=>{
+            return _.findIndex(opt.files, {root: file.root, name: file.name}) === -1
+          })
+        return project
+      })
+    })
+
+    bpm.deleteFiles(opt)
+  }
+
+  _createNewFile(files, cb) {
+    let currentProject = this.getSelectedProject()
+      , opt = {
+          uuid: 'uuid'
+        , token: 'token'
+        , type: this.props.type
+        , name: currentProject.name
+        , files: files.map((file)=>{
+            return {name: file, content: '', root: ''}
+          })
+        }
+    bpm.saveFiles(opt, (res)=>{
+      console.log(res)
+      this.setState({
+        projects: this.state.projects.map((project)=>{
+          if (project.name === opt.name)
+            project.files = project.files.concat(opt.files)
+          return project
+        })
+      })
+      if (_.isFunction(cb)) cb(null)
+    })
   }
 
   _saveFiles(topic, files) {
@@ -192,7 +346,7 @@ class ProjectManager extends React.Component {
   _changeFileOpenStatus(projectName, fileName) {
     this.setState({
       projects: this.state.projects.map((project)=>{
-        if (project.name === projectName) {
+        if (project.name === projectName)
           project.files = project.files.map((file)=>{
             if (file.name === fileName) {
               if (file.open)
@@ -203,7 +357,6 @@ class ProjectManager extends React.Component {
             }
             return file
           })
-        }
         return project
       })
     })
@@ -214,6 +367,7 @@ class ProjectManager extends React.Component {
       , project = self.getSelectedProject()
       // , files = project.files
     if (!project) return []
+    console.log('getting file tree')
     return project.files.map((file)=>{
       return (
         <ListItem
@@ -221,15 +375,15 @@ class ProjectManager extends React.Component {
                                 color='white'>description</FontIcon>}
             rightIconButton={
               <MIconButton icon={file.open ? 'chevron_left' : 'chevron_right'}
-                  onTouchTap={(file)=>{
+                  onTouchTap={function (thisFile) {
                     let projectName = this.getSelectedProject().name
-                    this._changeFileOpenStatus(projectName, file.name)
+                    this._changeFileOpenStatus(projectName, thisFile.name)
                   }.bind(this, file)}/>
             }
-            onTouchTap={(filename)=>{
-              let file = _.find(this.getSelectedProject().files, {name: filename})
-              pubsub.publish('show_file', file)
-              if (!file.open)
+            onTouchTap={function (filename) {
+              let thisFile = _.find(this.getSelectedProject().files, {name: filename})
+              pubsub.publish('show_file', thisFile)
+              if (!thisFile.open)
                 this._changeFileOpenStatus(this.getSelectedProject().name, filename)
             }.bind(self, file.name)}
             primaryText={file.name}/>
@@ -240,24 +394,9 @@ class ProjectManager extends React.Component {
   _handleSelectFieldChange(key, e) {
     let newState = {}
     newState[key] = e.target.value
-    console.log(newState)
     this.setState(newState)
     pubsub.publish('clear_files')
-    let count = 0
-      , project = _.find(this.state.projects, {name: e.target.value})
-    project.files.map((file)=>{
-      if (file.open) {
-        pubsub.publish('show_file', file)
-        count++
-      }
-    })
-    if (count === 0) {
-      switch (project.type) {
-      case 'arduino':
-        pubsub.publish('show_file', _.find(project.files, {name: project.name + '.ino'}))
-        break
-      }
-    }
+    this._showProject(_.find(this.state.projects, {name: e.target.value}))
   }
 
   getChildContext() {

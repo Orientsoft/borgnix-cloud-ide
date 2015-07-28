@@ -45,3 +45,11 @@ Open `config/config.json`, replace the default values with your actual settings.
 3. *projectRoot*: the directory to store user projects.
 4. *uploadDir*: the directory to store files uploaded by users.
 5. *arduinoLibs*: the directory to store libraries shared by all users.
+
+## TODO and Known Issues
+
+1. Improve UI design and details
+2. Show files in sub-directory in `ProjectManager`
+3. Find a proper way to add board selection in compiling and hex files downloading
+4. Create a new project using a template project
+5. User validation

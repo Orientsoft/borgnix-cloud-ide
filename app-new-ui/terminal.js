@@ -32,7 +32,7 @@ class TerminalComponent extends React.Component {
     })
     // this.term.write('terminal id: '+this.props.id.toString())
 
-    pubsub.subscribe('console_output_'+this.props.id, function (topic, data) {
+    pubsub.subscribe('console_output_' + this.props.id, function (topic, data) {
       self.term.writeln(data)
     })
   }
@@ -64,10 +64,14 @@ class TerminalComponent extends React.Component {
   }
 
   unbind() {
-    if (self.input)
-      self.input.removeAllListener()
-    self.input = null
+    if (this.input) this.input.removeAllListener()
+    this.input = null
   }
+}
+
+TerminalComponent.propTypes = {
+  id: React.PropTypes.string
+, lineHeight: React.PropTypes.number
 }
 
 TerminalComponent.defaultProps = {

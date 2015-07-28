@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nod ./bin/www"
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "arduino-compiler": "git+https://github.com/Orientsoft/borgnix-arduino-compiler.git",
@@ -38,6 +38,8 @@
   "devDependencies": {
     "babelify": "^6.1.3",
     "browserify": "^10.2.6",
+    "eslint": "^0.24.1",
+    "eslint-plugin-react": "^3.0.0",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
     "vinyl-source-stream": "^1.1.0",

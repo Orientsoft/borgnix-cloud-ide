@@ -1,5 +1,5 @@
 import React from 'react'
-import pubsub from 'pubsub-js'
+// import pubsub from 'pubsub-js'
 
 import ThemeManager from './theme'
 import ProjectManager from './project-manager'
@@ -16,11 +16,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    let self = this
 
-    // pubsub.subscribe('add_file', (topic, data)=>{
-    //   self.refs.editor.addFile(data)
-    // })
   }
 
   render() {
