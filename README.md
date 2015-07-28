@@ -60,6 +60,6 @@ Then open `http://127.0.0.1:3000` in your browser to use the client.
 
 1. Improve UI design and details
 2. Show files in sub-directory in `ProjectManager`
-3. Find a proper way to add board selection in compiling and hex files downloading
 4. Create a new project using a template project
 5. User validation
+6. When a project is deleted, the project select field and the editor show diffrent project
