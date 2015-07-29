@@ -168,8 +168,6 @@ class ProjectManager extends React.Component {
           </div>
         </div>
 
-
-
         <List style={{backgroundColor: '#757575'}}>
           {this._getFileTree()}
         </List>
@@ -231,7 +229,7 @@ class ProjectManager extends React.Component {
           })
           return project
         })
-      , selectedProject: this.state.selectedProject || data[0].name
+      , selectedProject: this.state.selectedProject || (data[0] ? data[0].name : null)
       })
 
       this._showProject(this.getSelectedProject())
@@ -240,6 +238,8 @@ class ProjectManager extends React.Component {
 
   _showProject(project) {
     let count = 0
+
+    if (!project) return null
 
     project.files.map((file)=>{
       if (file.open) {

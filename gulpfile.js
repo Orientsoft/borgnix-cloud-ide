@@ -4,12 +4,14 @@ var gulp = require('gulp')
   , watchify = require('watchify')
   , source = require('vinyl-source-stream')
   , concat = require('gulp-concat')
+  , uglify = require('gulp-uglify')
+  , streamify = require('gulp-streamify')
 
 gulp.task('install', function () {
-  gulp.src([
-    './node_modules/bootstrap/dist/**'
-  ])
+  gulp.src(['./node_modules/bootstrap/dist/**'])
     .pipe(gulp.dest('./public/vendor/bootstrap'))
+  gulp.src(['./node_modules/material-design-icons/iconfont/**'])
+    .pipe(gulp.dest('./public/vendor/material-design-icons'))
 })
 
 gulp.task('browserify', function () {
@@ -33,6 +35,7 @@ gulp.task('browserify', function () {
           console.error(err.stack)
         })
         .pipe(source('main.js'))
+        .pipe(streamify(uglify()))
     // This is where you add uglifying etc.
         .pipe(gulp.dest('./public/build/'))
         console.log('Updated!', (Date.now() - updateStart) + 'ms')

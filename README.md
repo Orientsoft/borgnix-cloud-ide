@@ -58,8 +58,8 @@ Then open `http://127.0.0.1:3000` in your browser to use the client.
 
 ## TODO and Known Issues
 
-1. Improve UI design and details
-2. Show files in sub-directory in `ProjectManager`
-4. Create a new project using a template project
-5. User validation
-6. When a project is deleted, the project select field and the editor show diffrent project
+- Improve UI design and details
+- Show files in sub-directory in `ProjectManager`
+- Create a new project using a template project
+- User validation
+- **[BUG]** When a project is deleted, the project select field and the editor show diffrent project

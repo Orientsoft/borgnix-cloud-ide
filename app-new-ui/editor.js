@@ -179,6 +179,27 @@ class Editor extends React.Component {
   }
 
   _getTabs() {
+    // show a default file when no file is loaded, so it doesn't look wiered
+    if (this.state.files.length === 0)
+      return (
+          <Tab label='Untitled'
+            onContextMenu={(e)=>{
+              e.preventDefault()
+              console.log(this, e)
+            }}>
+          <AceEditor mode='text'
+                     style={{width: '100%', height: 200}}
+                     theme='twilight'
+                     name='tab-0'
+                     value={
+                       '\n\nClick files on the left to show and edit them.'
+                     + '\n\nPlease create a new project if you don\'t have one'
+                     }
+                     ref='tab-0'
+                     file={null}/>
+        </Tab>
+      )
+
     let tabs = this.state.files.map((file, i)=>{
       return (
         <Tab label={file.name}
