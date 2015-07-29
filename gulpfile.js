@@ -3,9 +3,18 @@ var gulp = require('gulp')
   , babelify = require('babelify')
   , watchify = require('watchify')
   , source = require('vinyl-source-stream')
-  , concat = require('gulp-concat')
-  , uglify = require('gulp-uglify')
   , streamify = require('gulp-streamify')
+  , minifyify = require('minifyify')
+  , less = require('gulp-less')
+  , path = require('path')
+  , uglify = {
+      js: require('gulp-uglify')
+    , css: require('gulp-uglifycss')
+    }
+
+function printErrorStack(err) {
+  console.log(err.stack)
+}
 
 gulp.task('install', function () {
   gulp.src(['./node_modules/bootstrap/dist/**'])
@@ -14,38 +23,38 @@ gulp.task('install', function () {
     .pipe(gulp.dest('./public/vendor/material-design-icons'))
 })
 
+gulp.task('uglify', function () {
+  gulp.src('./public/js/**.js')
+      .pipe(uglify.js())
+      .pipe(gulp.dest('./public/js'))
+
+  gulp.src('./public/css/**.css')
+      .pipe(uglify.css())
+      .pipe(gulp.dest('./public/css'))
+})
+
+gulp.task('watch', function () {
+  gulp.watch('./app-new-ui/**.js', ['browserify'])
+  gulp.watch('./less/**.less', ['less'])
+})
+
 gulp.task('browserify', function () {
-  var bundler = browserify({
+  browserify({
     entries: ['./app-new-ui/main.js']
   , transform: [babelify]
   , debug: true
   , cache: {}
   , packageCache: {}
   , fullPaths: true
-  })
-
-  var watcher = watchify(bundler)
-
-  return watcher
-    .on('update', function () { // When any files update
-        var updateStart = Date.now()
-        console.log('Updating!')
-        watcher.bundle()// Create new bundle that uses the cache for high performance
-        .on('error', function (err) {
-          console.error(err.stack)
-        })
-        .pipe(source('main.js'))
-        .pipe(streamify(uglify()))
-    // This is where you add uglifying etc.
-        .pipe(gulp.dest('./public/build/'))
-        console.log('Updated!', (Date.now() - updateStart) + 'ms')
-    })
-    .bundle() // Create the initial bundle when starting the task
-    .on('error', function (err) {
-      console.error(err.stack || err)
-    })
+  }).bundle()
     .pipe(source('main.js'))
-    .pipe(gulp.dest('./public/build/'))
+    .pipe(gulp.dest('./public/js'))
 })
 
-gulp.task('default', ['browserify'])
+gulp.task('less', function () {
+  gulp.src('./less/main.less')
+      .pipe(less({paths: [path.join(__dirname, 'less')]}))
+      .pipe(gulp.dest('./public/css'))
+})
+
+gulp.task('default', ['watch'])

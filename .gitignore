@@ -31,3 +31,6 @@ uploads
 config/config.json
 public/vendor
 user-projects
+
+public/js/main.js
+public/css/main.css
