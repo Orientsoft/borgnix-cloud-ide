@@ -38,7 +38,7 @@ gulp dev-install
 
 You **HAVE TO** change the config file before you start using the application.
 
-Open `config/config.json`, replace the default values with your actual settings.
+Open `config/config.json`, replace the default values with your actual settings. Please use **ABSOLUTE PATH**.
 
 1. *arduinoDir*: the path to you Arduino IDE, for osx the path may be `/Applications/Arduino.app/Contents/Java`.
 2. *arduinoMkDir*: the path to your Arduino-Makefile directory.
@@ -62,4 +62,4 @@ Then open `http://127.0.0.1:3000` in your browser to use the client.
 - Show files in sub-directory in `ProjectManager`
 - Create a new project using a template project
 - User validation
-- **[BUG]** When a project is deleted, the project select field and the editor show diffrent project
+- **[BUG]** When a project is deleted, the project select field and the editor show different project

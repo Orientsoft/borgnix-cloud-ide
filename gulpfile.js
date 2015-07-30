@@ -21,6 +21,25 @@ gulp.task('install', function () {
     .pipe(gulp.dest('./public/vendor/bootstrap'))
   gulp.src(['./node_modules/material-design-icons/iconfont/**'])
     .pipe(gulp.dest('./public/vendor/material-design-icons'))
+  gulp.src(['./config/default.json'])
+    .pipe(gulp.dest('./config'))
+})
+
+gulp.task('production', function () {
+  browserify({
+    entries: ['./app-new-ui/main.js']
+  , transform: [babelify]
+  , debug: false
+  })
+  .bundle()
+  .pipe(source('main.js'))
+  .pipe(streamify(uglify.js()))
+  .pipe(gulp.dest('./public/js'))
+
+  gulp.src('./less/main.less')
+      .pipe(less({paths: [path.join(__dirname, 'less')]}))
+      .pipe(uglify.css())
+      .pipe(gulp.dest('./public/css'))
 })
 
 gulp.task('uglify', function () {
@@ -34,8 +53,35 @@ gulp.task('uglify', function () {
 })
 
 gulp.task('watch', function () {
-  gulp.watch('./app-new-ui/**.js', ['browserify'])
+  var bundler = browserify({
+    entries: ['./app-new-ui/main.js']
+  , transform: [babelify]
+  , debug: true
+  , cache: {}
+  , packageCache: {}
+  // , fullPaths: true
+  })
+
+  var watcher = watchify(bundler)
+
+  watcher.build = function () {
+    console.log('start build')
+    watcher.bundle()
+           .pipe(source('main.js'))
+           .pipe(streamify(uglify.js()))
+           .pipe(gulp.dest('./public/js'))
+  }
+
+  watcher.on('error', printErrorStack)
+         .on('update', watcher.build)
+         .on('time', function (time) {
+           console.log('building took:', time)
+         })
+
   gulp.watch('./less/**.less', ['less'])
+
+  watcher.build()
+  gulp.start('less')
 })
 
 gulp.task('browserify', function () {
@@ -46,7 +92,8 @@ gulp.task('browserify', function () {
   , cache: {}
   , packageCache: {}
   , fullPaths: true
-  }).bundle()
+  }).on('error', printErrorStack)
+    .bundle()
     .pipe(source('main.js'))
     .pipe(gulp.dest('./public/js'))
 })
