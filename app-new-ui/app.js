@@ -18,26 +18,28 @@ class App extends React.Component {
   componentDidMount() {
 
   }
-
+//style={{width: '100%', height: '100%'}}
   render() {
     return (
       <div>
       <Toolbar />
-      <div className='row mid'>
-        <div className='col-sm-3 no-right-padding'
-             style={{height: 432, backgroundColor: '#757575'}}>
+      <div className='' id='main-container'>
+          <div  id ='workspace'>
+              <div>
+              <Editor ref='editor' />
+              </div>
+              <div className='row'>
+                    <Terminals ref='terms'/>
+              </div>
+          </div>
+        <div  id ='sidebar'>
           <ProjectManager
               ref='projectManager'
               id='project-manager'
               type='arduino'/>
         </div>
-        <div className='col-sm-9 no-left-padding mid'>
-          <Editor ref='editor' style={{width: '100%', height: '100%'}}/>
-        </div>
-      </div>
-      <div className='row'>
-        <Terminals ref='terms'/>
-      </div>
+          <div id="sidebar-separator" className="ui-draggable"></div>
+
       </div>
     )
   }

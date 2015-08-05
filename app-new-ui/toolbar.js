@@ -20,57 +20,60 @@ class Toolbar extends React.Component {
     , postion: 'absolute'
     }
     return (
-      <div className='toolbar'>
-        <div style={{float: 'right', paddingTop: 20}}>
-        <MIconButton icon='add'
-            tooltipPosition='bottom-right'
-            tooltipStyles={tooltipStyles}
-            tooltip='New Project'
-            onTouchTap={()=>{
-              pubsub.publish('new_project')
-            }}/>
-        <MIconButton
-            icon='save'
-            tooltipPosition='bottom-right'
-            tooltipStyles={tooltipStyles}
-            tooltip='Save'
-            onTouchTap={()=>{
-              pubsub.publish('editor_save_all_files')
-            }}/>
-        <MIconButton
-            icon='delete'
-            tooltipPosition='bottom-right'
-            tooltipStyles={tooltipStyles}
-            tooltip='Delete Current File'
-            onTouchTap={()=>{
-              pubsub.publish('delete_current_file')
-            }}/>
-        <MIconButton
-            icon='library_books'
-            tooltipPosition='bottom-right'
-            tooltipStyles={tooltipStyles}
-            tooltip='Add Library'
-            onTouchTap={()=>{
-              pubsub.publish('open_libs_dialog')
-            }}/>
-        <MIconButton icon='build'
-            tooltipPosition='bottom-right'
-            tooltipStyles={tooltipStyles}
-            tooltip='Compile'
-            onTouchTap={()=>{
-              console.log('board', this.refs.boardSelect.state.selectedBoard)
-              pubsub.publish('compile', this.refs.boardSelect.state.selectedBoard)
-            }}/>
-        <MIconButton icon='file_download'
-            tooltipPosition='bottom-right'
-            tooltipStyles={tooltipStyles}
-            tooltip='Download Hex File'
-            onTouchTap={()=>{
-              pubsub.publish('download_hex', this.refs.boardSelect.state.selectedBoard)
-            }}/>
-        </div>
-        <BoardSelect ref='boardSelect' style={{paddingLeft: 20, zIndex: 9999}}/>
+      <div className='toolbar' >
+        <BoardSelect ref='boardSelect' className='topboardselect'/>
+          <div className='navtop'>
+              <div className='navbnt'>
+                  <MIconButton icon='add'
+                  tooltipPosition='bottom-right'
+                  tooltipStyles={tooltipStyles}
+                  tooltip='New Project'
+                  onTouchTap={()=>{
+                      pubsub.publish('new_project')
+                      }}/>
+                  <MIconButton
+                  icon='save'
+                  tooltipPosition='bottom-right'
+                  tooltipStyles={tooltipStyles}
+                  tooltip='Save'
+                  onTouchTap={()=>{
+                      pubsub.publish('editor_save_all_files')
+                      }}/>
+                  <MIconButton
+                  icon='delete'
+                  tooltipPosition='bottom-right'
+                  tooltipStyles={tooltipStyles}
+                  tooltip='Delete Current File'
+                  onTouchTap={()=>{
+                      pubsub.publish('delete_current_file')
+                      }}/>
+                  <MIconButton
+                  icon='library_books'
+                  tooltipPosition='bottom-right'
+                  tooltipStyles={tooltipStyles}
+                  tooltip='Add Library'
+                  onTouchTap={()=>{
+                      pubsub.publish('open_libs_dialog')
+                      }}/>
+                  <MIconButton icon='build'
+                  tooltipPosition='bottom-right'
+                  tooltipStyles={tooltipStyles}
+                  tooltip='Compile'
+                  onTouchTap={()=>{
+                      console.log('board', this.refs.boardSelect.state.selectedBoard)
+                      pubsub.publish('compile', this.refs.boardSelect.state.selectedBoard)
+                      }}/>
+                  <MIconButton icon='file_download'
+                  tooltipPosition='bottom-right'
+                  tooltipStyles={tooltipStyles}
+                  tooltip='Download Hex File'
+                  onTouchTap={()=>{
+                      pubsub.publish('download_hex', this.refs.boardSelect.state.selectedBoard)
+                      }}/>
+              </div>
+          </div>
       </div>
+
     )
   }
 

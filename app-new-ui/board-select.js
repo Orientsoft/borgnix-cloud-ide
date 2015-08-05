@@ -44,6 +44,7 @@ class BoardSelect extends React.Component {
       <SelectField
         {...this.props}
         floatingLabelText='board'
+        className='board-topleft'
         displayMember='name'
         valueMember='id'
         // style={{
