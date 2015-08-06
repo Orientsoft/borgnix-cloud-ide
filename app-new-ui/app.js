@@ -1,5 +1,4 @@
 import React from 'react'
-// import pubsub from 'pubsub-js'
 
 import ThemeManager from './theme'
 import ProjectManager from './project-manager'
@@ -21,23 +20,21 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
-      <Toolbar />
-      <div className='row mid'>
-        <div className='col-sm-3 no-right-padding'
-             style={{height: 432, backgroundColor: '#757575'}}>
-          <ProjectManager
-              ref='projectManager'
-              id='project-manager'
-              type='arduino'/>
+      <div style={{height: '100%'}}>
+        <Toolbar/>
+        <div id='main-container'>
+          <div id='project-manager'>
+            <ProjectManager
+                ref='projectManager'
+                // id='project-manager'
+                type='arduino'/>
+          </div>
+
+          <div id='main-edit' style={{height: '100%'}}>
+            <Editor ref='editor' style={{width: '100%'}} id='editor'/>
+            <Terminals ref='terms' id='terms'/>
+          </div>
         </div>
-        <div className='col-sm-9 no-left-padding mid'>
-          <Editor ref='editor' style={{width: '100%', height: '100%'}}/>
-        </div>
-      </div>
-      <div className='row'>
-        <Terminals ref='terms'/>
-      </div>
       </div>
     )
   }

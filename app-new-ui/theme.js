@@ -1,7 +1,8 @@
 import {Styles} from 'material-ui'
+import CustomTheme from './custom-theme'
 
 let ThemeManager = new Styles.ThemeManager()
 
-ThemeManager.setTheme(ThemeManager.types.DARK)
+ThemeManager.setTheme(CustomTheme)
 
 export default ThemeManager

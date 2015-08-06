@@ -168,7 +168,10 @@ class ProjectManager extends React.Component {
           </div>
         </div>
 
-        <List style={{backgroundColor: '#757575'}}>
+        <List
+            // style={{backgroundColor: '#757575'}}
+            style={{backgroundColor: '#efeff7'}}
+            >
           {this._getFileTree()}
         </List>
 
@@ -305,6 +308,7 @@ class ProjectManager extends React.Component {
   }
 
   _compileProject(topic, board) {
+    console.log('inside compile')
     switch (this.props.type) {
     case 'arduino':
       let opts = {
@@ -414,12 +418,12 @@ class ProjectManager extends React.Component {
       , project = self.getSelectedProject()
       // , files = project.files
     if (!project) return []
-    console.log('getting file tree')
+    // console.log('getting file tree')
     return project.files.map((file)=>{
       return (
         <ListItem
-            leftIcon={<FontIcon className='material-icons'
-                                color='white'>description</FontIcon>}
+            // style={{backgroundColor: '#efeff7'}}
+            leftIcon={<FontIcon className='material-icons'>description</FontIcon>}
             rightIconButton={
               <MIconButton icon={file.open ? 'chevron_left' : 'chevron_right'}
                   onTouchTap={function (thisFile) {
@@ -440,7 +444,7 @@ class ProjectManager extends React.Component {
 
   _getLibTree(type) {
     let libs = (type === 'user' ? this.state.libs.userLibs : this.state.libs.ideLibs)
-    console.log(libs)
+    // console.log(libs)
     return libs.map((lib)=>{
       return (
         <ListItem primaryText={lib.name}>

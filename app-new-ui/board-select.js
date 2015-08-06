@@ -1,4 +1,5 @@
 import React from 'react'
+import pubsub from 'pubsub-js'
 import {SelectField} from 'material-ui'
 import ThemeManager from './theme'
 import BAC from 'arduino-compiler/client'
@@ -28,7 +29,7 @@ class BoardSelect extends React.Component {
 
       self.setState({
         boards: boards
-      , selectedBoard: 'uno'
+      , selectedBoard: self.props.board
       })
     })
   }
@@ -64,6 +65,7 @@ class BoardSelect extends React.Component {
   _handleSelectValueChange(key, e) {
     var newState = {}
     newState[key] = e.target.value
+    pubsub.publish('select_board', e.target.value)
     this.setState(newState)
   }
 }
@@ -73,11 +75,11 @@ BoardSelect.childContextTypes = {
 }
 
 BoardSelect.propTypes = {
-
+  board: React.PropTypes.string
 }
 
 BoardSelect.defaultProps = {
-
+  board: 'uno'
 }
 
 export default BoardSelect

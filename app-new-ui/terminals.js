@@ -15,14 +15,18 @@ class Terminals extends React.Component {
 
   render() {
     return (
-      <Tabs
-          id='terms'
-          tabWidth={150}
-          tabItemContainerStyle={{width: 150 * 1}}>
-        <Tab label='compile' >
-          <Terminal ref='compileTerm' id='compile'/>
-        </Tab>
-      </Tabs>
+      <div {...this.props}>
+        <Tabs tabWidth={150}
+            inkBarStyle={{backgroundColor: '#4684df'}}
+            tabItemContainerStyle={{width: 150 * 1, height: 26}}>
+          <Tab label='compile' style={{height: 26, color: '#515667'}}>
+            <div style={{width: '100%', height: '100%'}} className='terminal-container'>
+              <Terminal ref='compileTerm' id='compile'/>
+            </div>
+          </Tab>
+        </Tabs>
+      </div>
+
     )
   }
 

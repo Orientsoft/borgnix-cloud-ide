@@ -68,7 +68,7 @@ gulp.task('watch', function () {
     console.log('start build')
     watcher.bundle()
            .pipe(source('main.js'))
-           .pipe(streamify(uglify.js()))
+          //  .pipe(streamify(uglify.js()))
            .pipe(gulp.dest('./public/js'))
   }
 

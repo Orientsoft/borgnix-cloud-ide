@@ -4,8 +4,7 @@ import AceEditor from 'react-ace'
 import $ from 'jquery'
 import pubsub from 'pubsub-js'
 
-
-import 'brace/theme/twilight'
+import 'brace/theme/tomorrow'
 import 'brace/mode/c_cpp'
 
 import ThemeManager from './theme'
@@ -17,6 +16,8 @@ let modes = {
   'c_cpp': [ '.ino', '.cpp', '.cc', '.c', '.h']
 }
 
+let tabStyle = {height: 26, color: '#515667'}
+
 function getMode (filename) {
   var ext = filename.slice(filename.lastIndexOf('.'))
   for (var mode in modes) {
@@ -24,7 +25,6 @@ function getMode (filename) {
   }
   return 'text'
 }
-
 
 class Editor extends React.Component {
   constructor(props) {
@@ -40,7 +40,10 @@ class Editor extends React.Component {
         <Tabs
             tabWidth={150}
             ref='tabs'
-            tabItemContainerStyle={{width: 150 * this.state.files.length}}>
+            style={{height: '100%'}}
+            inkBarStyle={{backgroundColor: '#4684df'}}
+            contentContainerStyle={{backgroundColor: 'rgb(246, 246, 246)', height: 'calc(100% - 26px)'}}
+            tabItemContainerStyle={{width: 150 * this.state.files.length, height: 26}}>
           {
             this._getTabs()
           }
@@ -53,7 +56,7 @@ class Editor extends React.Component {
     let self = this
 
     this.resize(true)
-    this.setMaxLines(24)
+
 
     $(window).resize(()=>{
       self.resize(true)
@@ -100,7 +103,7 @@ class Editor extends React.Component {
 
   componentDidUpdate() {
     this.resize(true)
-    this.setMaxLines(24)
+    // this.setMaxLines(24)
   }
 
   componentWillUnmount() {
@@ -140,7 +143,6 @@ class Editor extends React.Component {
   }
 
   saveAllFiles() {
-    // console.log(this.state.files)
     let self = this
     let filesToSave = _.keys(this.refs)
           .filter((name)=>{
@@ -161,9 +163,13 @@ class Editor extends React.Component {
   }
 
   resize() {
+    let height = $('#editor').height() - 26
     for (var com in this.refs) {
       if (com.indexOf('tab-') !== 0) continue
       $('#' + com).css('width', $(React.findDOMNode(this)).css('width'))
+      // let height = $(React.findDOMNode(this)).height() - 50
+      console.log(Math.floor(height / 16))
+      this.setMaxLines(Math.floor(height / 16))
       this.refs[com].editor.resize()
     }
   }
@@ -183,33 +189,36 @@ class Editor extends React.Component {
     if (this.state.files.length === 0)
       return (
           <Tab label='Untitled'
+            style={tabStyle}
             onContextMenu={(e)=>{
               e.preventDefault()
               console.log(this, e)
             }}>
-          <AceEditor mode='text'
-                     style={{width: '100%', height: 200}}
-                     theme='twilight'
-                     name='tab-0'
-                     value={
-                       '\n\nClick files on the left to show and edit them.'
-                     + '\n\nPlease create a new project if you don\'t have one'
-                     }
-                     ref='tab-0'
-                     file={null}/>
+          <AceEditor
+              mode='text'
+              style={{width: '100%', height: 200}}
+              theme='tomorrow'
+              name='tab-0'
+              value={
+               '\n\nClick files on the left to show and edit them.'
+              + '\n\nPlease create a new project if you don\'t have one'
+              }
+              ref='tab-0'
+              file={null}/>
         </Tab>
       )
 
     let tabs = this.state.files.map((file, i)=>{
       return (
         <Tab label={file.name}
+            style={tabStyle}
             onContextMenu={(e)=>{
               e.preventDefault()
               console.log(this, e)
             }}>
           <AceEditor mode={getMode(file.name)}
                      style={{width: '100%', height: 200}}
-                     theme='twilight'
+                     theme='tomorrow'
                      name={'tab-' + i}
                      value={file.content}
                      ref={'tab-' + i}
