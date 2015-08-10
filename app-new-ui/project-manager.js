@@ -15,12 +15,12 @@ colors.enabled = true
 
 let bpm = new BPM({
   host: ''
-, prefix: '/p'
+, prefix: 'p'
 })
 
 let bac = new BAC({
   host: ''
-, prefix: '/c'
+, prefix: 'c'
 })
 
 function newProjectDialog() {

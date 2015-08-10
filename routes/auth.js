@@ -1,16 +1,13 @@
 var express = require('express')
 var router = express.Router()
 
-/* GET home page. */
+const BORGNIX_HOME = 'http://voyager.orientsoft.cn'
+
+// check for user login, if user's not logged in, redirect to login page
 router.all('*', function(req, res, next) {
-  // res.render('index', { title: 'Express' })
   console.log(req.session)
-  // next()
-  // res.render('error', new Error('not authed'))
-  // res.redirect('/')
-  if (req.path === '/') next()
-  else res.redirect('/')
-  console.log(req.path)
+  if (req.session.user) next()
+  else res.redirect(BORGNIX_HOME)
 })
 
 module.exports = router

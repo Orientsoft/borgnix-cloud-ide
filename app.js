@@ -10,6 +10,8 @@ var express = require('express')
 var routes = require('./routes/index')
 var users = require('./routes/users')
 
+var config = fs.readJsonSync('config/config.json')
+
 var app = express()
 
 // view engine setup
@@ -26,30 +28,28 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(multer({dest: './uploads'}))
 
-var redis = require('redis')
-var client = redis.createClient(6379, 'localhost')
-client.auth('2@9T4m6H') //redis验证密码
+// var client = redis.createClient(6379, 'localhost')
+// client.on('ready', function () {
+//   console.log('redis client ready')
+//   client.get('sessions', function (err, reply) {
+//     console.log(reply)
+//   })
+// })
+// client.on('connect', function () {
+//   console.log('redis client connected')
+// })
 
-var Sessions = require('express-sessions')
-  , session = require('express-session')
 
-var sessionStore = new Sessions({
-  storage: 'redis',
-  instance: client, // optional
-  collection: 'sessions', // optional
-  expire: 86400 // 24H
-})
-
-const SESSION_SECRET = 'test'
+var session = require('express-session')
+var RedisStore = require('connect-redis')(session)
 
 app.use(session({
-  secret: SESSION_SECRET
-, key: 'app.sid'
-, store: sessionStore
-}))//app.sid 非常重要cookie的值
-
-
-var config = fs.readJsonSync('config/config.json')
+  secret: config.session.secret
+, name: 'app.sid'
+, store: new RedisStore(config.session.redis)
+, resave: false
+, saveUninitialized: false
+}))
 
 var arduino = require('arduino-compiler/router')(config)
   , projects = require('borgnix-project-manager/router')(config)

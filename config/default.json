@@ -3,5 +3,14 @@
   "arduinoMkDir": "/path/to/arduino/makefile",
   "projectRoot": "/path/to/store/user/projects",
   "uploadDir": "/path/to/store/uploaded/files",
-  "arduinoLibs": "/path/to/public/arduino/libraries"
+  "arduinoLibs": "/path/to/public/arduino/libraries",
+  "session": {
+    "secret": "secret",
+    "redis": {
+      "host": "localhost",
+      "port": 6379,
+      "pass": null,
+      "prefix": "sessions:"
+    }
+  }
 }
