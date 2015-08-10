@@ -4,13 +4,13 @@
   "dependencies": {
     "arduino-compiler": {
       "version": "1.0.0",
-      "from": "git+https://github.com/Orientsoft/borgnix-arduino-compiler.git#ef4b04b0c8d195c4a685f8f39f5a29e740260da5",
-      "resolved": "git+https://github.com/Orientsoft/borgnix-arduino-compiler.git#ef4b04b0c8d195c4a685f8f39f5a29e740260da5",
+      "from": "git+https://github.com/Orientsoft/borgnix-arduino-compiler.git#d0d25a3565faf720a59a6d1371c9598a75bc4906",
+      "resolved": "git+https://github.com/Orientsoft/borgnix-arduino-compiler.git#d0d25a3565faf720a59a6d1371c9598a75bc4906",
       "dependencies": {
         "async": {
-          "version": "1.4.0",
-          "from": "https://registry.npmjs.org/async/-/async-1.4.0.tgz",
-          "resolved": "https://registry.npmjs.org/async/-/async-1.4.0.tgz"
+          "version": "1.4.2",
+          "from": "https://registry.npmjs.org/async/-/async-1.4.2.tgz",
+          "resolved": "https://registry.npmjs.org/async/-/async-1.4.2.tgz"
         },
         "dataobject-parser": {
           "version": "1.0.6",
@@ -25,24 +25,24 @@
           }
         },
         "express": {
-          "version": "4.13.1",
-          "from": "https://registry.npmjs.org/express/-/express-4.13.1.tgz",
-          "resolved": "https://registry.npmjs.org/express/-/express-4.13.1.tgz",
+          "version": "4.13.3",
+          "from": "https://registry.npmjs.org/express/-/express-4.13.3.tgz",
+          "resolved": "https://registry.npmjs.org/express/-/express-4.13.3.tgz",
           "dependencies": {
             "accepts": {
-              "version": "1.2.11",
-              "from": "https://registry.npmjs.org/accepts/-/accepts-1.2.11.tgz",
-              "resolved": "https://registry.npmjs.org/accepts/-/accepts-1.2.11.tgz",
+              "version": "1.2.12",
+              "from": "https://registry.npmjs.org/accepts/-/accepts-1.2.12.tgz",
+              "resolved": "https://registry.npmjs.org/accepts/-/accepts-1.2.12.tgz",
               "dependencies": {
                 "mime-types": {
-                  "version": "2.1.3",
-                  "from": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.3.tgz",
-                  "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.3.tgz",
+                  "version": "2.1.4",
+                  "from": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.4.tgz",
+                  "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.4.tgz",
                   "dependencies": {
                     "mime-db": {
-                      "version": "1.15.0",
-                      "from": "https://registry.npmjs.org/mime-db/-/mime-db-1.15.0.tgz",
-                      "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.15.0.tgz"
+                      "version": "1.16.0",
+                      "from": "https://registry.npmjs.org/mime-db/-/mime-db-1.16.0.tgz",
+                      "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.16.0.tgz"
                     }
                   }
                 },
@@ -54,9 +54,9 @@
               }
             },
             "array-flatten": {
-              "version": "1.1.0",
-              "from": "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.0.tgz",
-              "resolved": "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.0.tgz"
+              "version": "1.1.1",
+              "from": "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.1.tgz",
+              "resolved": "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.1.tgz"
             },
             "content-disposition": {
               "version": "0.5.0",
@@ -138,9 +138,9 @@
               "resolved": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.0.tgz"
             },
             "path-to-regexp": {
-              "version": "0.1.6",
-              "from": "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.6.tgz",
-              "resolved": "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.6.tgz"
+              "version": "0.1.7",
+              "from": "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.7.tgz",
+              "resolved": "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.7.tgz"
             },
             "proxy-addr": {
               "version": "1.0.8",
@@ -214,9 +214,9 @@
               "resolved": "https://registry.npmjs.org/serve-static/-/serve-static-1.10.0.tgz"
             },
             "type-is": {
-              "version": "1.6.5",
-              "from": "https://registry.npmjs.org/type-is/-/type-is-1.6.5.tgz",
-              "resolved": "https://registry.npmjs.org/type-is/-/type-is-1.6.5.tgz",
+              "version": "1.6.6",
+              "from": "https://registry.npmjs.org/type-is/-/type-is-1.6.6.tgz",
+              "resolved": "https://registry.npmjs.org/type-is/-/type-is-1.6.6.tgz",
               "dependencies": {
                 "media-typer": {
                   "version": "0.3.0",
@@ -224,28 +224,28 @@
                   "resolved": "https://registry.npmjs.org/media-typer/-/media-typer-0.3.0.tgz"
                 },
                 "mime-types": {
-                  "version": "2.1.3",
-                  "from": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.3.tgz",
-                  "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.3.tgz",
+                  "version": "2.1.4",
+                  "from": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.4.tgz",
+                  "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.4.tgz",
                   "dependencies": {
                     "mime-db": {
-                      "version": "1.15.0",
-                      "from": "https://registry.npmjs.org/mime-db/-/mime-db-1.15.0.tgz",
-                      "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.15.0.tgz"
+                      "version": "1.16.0",
+                      "from": "https://registry.npmjs.org/mime-db/-/mime-db-1.16.0.tgz",
+                      "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.16.0.tgz"
                     }
                   }
                 }
               }
             },
-            "vary": {
-              "version": "1.0.1",
-              "from": "https://registry.npmjs.org/vary/-/vary-1.0.1.tgz",
-              "resolved": "https://registry.npmjs.org/vary/-/vary-1.0.1.tgz"
-            },
             "utils-merge": {
               "version": "1.0.0",
               "from": "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.0.tgz",
               "resolved": "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.0.tgz"
+            },
+            "vary": {
+              "version": "1.0.1",
+              "from": "https://registry.npmjs.org/vary/-/vary-1.0.1.tgz",
+              "resolved": "https://registry.npmjs.org/vary/-/vary-1.0.1.tgz"
             }
           }
         },
@@ -413,14 +413,14 @@
               "resolved": "https://registry.npmjs.org/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz"
             },
             "mime-types": {
-              "version": "2.1.3",
-              "from": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.3.tgz",
-              "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.3.tgz",
+              "version": "2.1.4",
+              "from": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.4.tgz",
+              "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.4.tgz",
               "dependencies": {
                 "mime-db": {
-                  "version": "1.15.0",
-                  "from": "https://registry.npmjs.org/mime-db/-/mime-db-1.15.0.tgz",
-                  "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.15.0.tgz"
+                  "version": "1.16.0",
+                  "from": "https://registry.npmjs.org/mime-db/-/mime-db-1.16.0.tgz",
+                  "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.16.0.tgz"
                 }
               }
             },
@@ -925,8 +925,8 @@
     },
     "borgnix-project-manager": {
       "version": "1.0.0",
-      "from": "git+https://github.com/Orientsoft/borgnix-project-manager.git#4b0ea8dd937ffcfc5ccf94b81596ebe0f8f7628f",
-      "resolved": "git+https://github.com/Orientsoft/borgnix-project-manager.git#4b0ea8dd937ffcfc5ccf94b81596ebe0f8f7628f",
+      "from": "git+https://github.com/Orientsoft/borgnix-project-manager.git#5cefbd92430e4f5113cf523dc1e78a33824927da",
+      "resolved": "git+https://github.com/Orientsoft/borgnix-project-manager.git#5cefbd92430e4f5113cf523dc1e78a33824927da",
       "dependencies": {
         "deepcopy": {
           "version": "0.5.0",
@@ -1065,17 +1065,17 @@
     },
     "connect-redis": {
       "version": "2.4.1",
-      "from": "connect-redis@*",
+      "from": "https://registry.npmjs.org/connect-redis/-/connect-redis-2.4.1.tgz",
       "resolved": "https://registry.npmjs.org/connect-redis/-/connect-redis-2.4.1.tgz",
       "dependencies": {
         "debug": {
           "version": "1.0.4",
-          "from": "debug@>=1.0.4 <2.0.0",
+          "from": "https://registry.npmjs.org/debug/-/debug-1.0.4.tgz",
           "resolved": "https://registry.npmjs.org/debug/-/debug-1.0.4.tgz",
           "dependencies": {
             "ms": {
               "version": "0.6.2",
-              "from": "ms@0.6.2",
+              "from": "https://registry.npmjs.org/ms/-/ms-0.6.2.tgz",
               "resolved": "https://registry.npmjs.org/ms/-/ms-0.6.2.tgz"
             }
           }
