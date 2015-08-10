@@ -168,7 +168,7 @@ class Editor extends React.Component {
       if (com.indexOf('tab-') !== 0) continue
       $('#' + com).css('width', $(React.findDOMNode(this)).css('width'))
       // let height = $(React.findDOMNode(this)).height() - 50
-      console.log(Math.floor(height / 16))
+      // console.log(Math.floor(height / 16))
       this.setMaxLines(Math.floor(height / 16))
       this.refs[com].editor.resize()
     }

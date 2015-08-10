@@ -1,0 +1,79 @@
+@import "color.less";
+
+@bgColor: #eee;
+@leftColor: #efeff7;
+
+html, body {
+  background-color: @bgColor !important;
+  height: 100%;
+}
+
+.no-left-padding{
+  padding-left: 0 !important;
+}
+
+.no-right-padding {
+  padding-right: 0 !important;
+}
+
+.no-padding {
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+}
+
+@sidebarWidth: 325px;
+
+#project-manager {
+  background-color: @leftColor;
+  height: calc(~"100% - @{toolbarHeight}");
+  position: absolute;
+  border-right: @splitWidth solid #ccc;
+  width: @sidebarWidth;
+  top: @toolbarHeight;
+  left: 0;
+}
+
+#main-container {
+  margin-right: 0;
+  margin-left: 0;
+  width: 100%;
+  height: calc(~"100% - @{toolbarHeight}");
+}
+
+@splitWidth: 1px;
+
+#editor {
+  height: calc(~"100% - @{terminalHeight}");
+  width: 100%;
+  border-bottom: @splitWidth solid #ccc;
+}
+
+@terminalHeight: 225px;
+#terms {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+#main-edit {
+  width: calc(~"100% - @{sidebarWidth}") !important;
+  height: calc(~"100% - @{toolbarHeight}") !important;
+  position: absolute;
+  left: @sidebarWidth;
+  top: @toolbarHeight;
+}
+
+#gap-filler {
+  background-color: rgb(246, 246, 246);
+  width: 100%;
+  position: absolute;
+  bottom: @terminalHeight;
+  // left: 0;
+  // top: @toolbarHeight;
+  z-index: 0;
+  height: 30px;
+}
+
+.ace_gutter_layer {
+  background-color: rgb(246, 246, 246);
+}
