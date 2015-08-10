@@ -145,8 +145,8 @@ class ProjectManager extends React.Component {
   render() {
     return (
       <div {...this.props}>
-        <div className='row'>
-          <div className='col-sm-10' style={{paddingLeft: 25, paddingRight: 0}}>
+        <div className='sidebar_list'>
+          <div className='sidebar_listtop' style={{paddingLeft: 25, paddingRight: 0}}>
           <SelectField
               ref='project'
               floatingLabelText='project'
@@ -156,7 +156,7 @@ class ProjectManager extends React.Component {
               onChange={this._handleSelectFieldChange.bind(this, 'selectedProject')}
               menuItems={this.state.projects}/>
           </div>
-          <div className='col-sm-2' style={{padding: 0, paddingTop: 15}}>
+          <div className='newico_n' style={{padding: 0, paddingTop: 15}}>
           <IconMenu iconButtonElement={<MIconButton icon='more_vert'/>}>
             <MenuItem
                 primaryText='New File'
