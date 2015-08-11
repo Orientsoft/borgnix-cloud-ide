@@ -12,12 +12,19 @@ Install Arduino-Makefile by clone the latest version from github with the follow
 git clone https://github.com/sudar/Arduino-Makefile.git
 ```
 
+Install the application itself using the following command:
 
 ```bash
 npm i git+https://github.com/Orientsoft/borgnix-cloud-ide.git
 ```
 
-For development install with [borgnix-project-manager](https://github.com/Orientsoft/borgnix-project-manager) and [borgnix-arduino-compiler](https://github.com/Orientsoft/borgnix-arduino-compiler), run the following commands:
+Check your `public` folder for a directory named `vendor`, if none exists, run:
+
+```bash
+gulp install
+```
+
+<!-- For development install with [borgnix-project-manager](https://github.com/Orientsoft/borgnix-project-manager) and [borgnix-arduino-compiler](https://github.com/Orientsoft/borgnix-arduino-compiler), run the following commands:
 
 ```bash
 git clone https://github.com/Orientsoft/borgnix-project-manager.git
@@ -31,8 +38,8 @@ cd ..
 git clone https://github.com/Orientsoft/borgnix-cloud-ide.git
 cd borgnix-cloud-ide
 npm i
-gulp dev-install
-```
+gulp link
+``` -->
 
 ## CONFIG
 
@@ -45,6 +52,30 @@ Open `config/config.json`, replace the default values with your actual settings.
 3. *projectRoot*: the directory to store user projects.
 4. *uploadDir*: the directory to store files uploaded by users.
 5. *arduinoLibs*: the directory to store libraries shared by all users.
+6. *singleUser*: whether to use single user mode or not.
+7. *session*: sessions management options, see **SESSION** for details.
+
+## SESSION
+
+### config file
+
+1. *secret*: secret key for sessions.
+2. *store*: session store options.
+  - for redis:
+  ```js
+  {
+    "type": "redis",
+    "host": "localhost", //your redis host
+    "port": 6379, //your redis port
+    "pass": "password", //password for redis, if any
+    "prefix": "sessions:" //prefix for redis keys
+  }
+  ```
+
+### validation
+
+See `routes/auth.js` and `routes/single.js` for details
+
 
 ## USAGE
 
@@ -54,12 +85,14 @@ To start the server, run:
 npm start
 ```
 
-Then open `http://127.0.0.1:3000` in your browser to use the client.
+Then open `http://127.0.0.1:3001` in your browser to use the client.
+
+You can change the port settings in `bin/www`
 
 ## TODO and Known Issues
 
 - Improve UI design and details
 - Show files in sub-directory in `ProjectManager`
-- Create a new project using a template project
-- User validation
+- ~~Create a new project using a template project~~
+- ~~User validation~~
 - **[BUG]** When a project is deleted, the project select field and the editor show different project
