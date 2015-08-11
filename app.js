@@ -6,6 +6,7 @@ var express = require('express')
   , bodyParser = require('body-parser')
   , multer = require('multer')
   , fs = require('fs-extra')
+  , _ = require('underscore')
 
 var routes = require('./routes/index')
 var users = require('./routes/users')
@@ -17,6 +18,7 @@ var app = express()
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'jade')
+
 app.set('env', 'development')
 
 // uncomment after placing your favicon in /public
@@ -28,32 +30,31 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(multer({dest: './uploads'}))
 
-// var client = redis.createClient(6379, 'localhost')
-// client.on('ready', function () {
-//   console.log('redis client ready')
-//   client.get('sessions', function (err, reply) {
-//     console.log(reply)
-//   })
-// })
-// client.on('connect', function () {
-//   console.log('redis client connected')
-// })
-
-
 var session = require('express-session')
-var RedisStore = require('connect-redis')(session)
+
+var sessionStore
+
+switch (config.session.store.type) {
+  case 'redis':
+    var RedisStore = require('connect-redis')(session)
+    sessionStore = new RedisStore(_.omit(config.session.store, 'type'))
+    break
+  default:
+    break
+}
 
 app.use(session({
   secret: config.session.secret
 , name: 'app.sid'
-, store: new RedisStore(config.session.redis)
+, store: sessionStore
 , resave: false
 , saveUninitialized: false
 }))
 
 var arduino = require('arduino-compiler/router')(config)
   , projects = require('borgnix-project-manager/router')(config)
-  , auth = require('./routes/auth')
+
+var auth = require('./routes/' + (config.singleUser ? 'single' : 'auth'))
 
 app.use('*', auth)
 app.use('/', routes)

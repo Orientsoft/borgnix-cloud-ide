@@ -92,7 +92,22 @@ class Toolbar extends React.Component {
             onTouchTap={()=>{
               this.refs.settings.show()
             }}/>
+
+        <MIconButton
+            icon='exit_to_app'
+            tooltipPosition='bottom-left'
+            tooltipStyles={tooltipStyles}
+            iconCssClass='toolbar-icon'
+            tooltip='exit'
+            style={{float: 'right'}}
+            onTouchTap={()=>{
+              // this.refs.settings.show()
+              window.history.back()
+            }}/>
         </div>
+
+
+
         <Dialog ref='settings'>
           <BoardSelect ref='boardSelect' style={{paddingLeft: 20, zIndex: 9999}} board={this.state.board}/>
         </Dialog>

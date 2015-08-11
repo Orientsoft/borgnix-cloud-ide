@@ -7,6 +7,8 @@ var gulp = require('gulp')
   , minifyify = require('minifyify')
   , less = require('gulp-less')
   , path = require('path')
+  , fs = require('fs-extra')
+  , exec = require('child_process').exec
   , uglify = {
       js: require('gulp-uglify')
     , css: require('gulp-uglifycss')
@@ -102,6 +104,27 @@ gulp.task('less', function () {
   gulp.src('./less/main.less')
       .pipe(less({paths: [path.join(__dirname, 'less')]}))
       .pipe(gulp.dest('./public/css'))
+})
+
+gulp.task('link', function () {
+  fs.symlink( path.join(__dirname, '../borgnix-arduino-compiler')
+            , path.join(__dirname, 'node_modules/arduino-compiler'))
+  fs.symlink( path.join(__dirname, '../borgnix-project-manager')
+            , path.join(__dirname, 'node_modules/borgnix-project-manager'))
+})
+
+gulp.task('unlink', function () {
+  fs.removeSync(path.join(__dirname, 'node_modules/arduino-compiler'))
+  fs.removeSync(path.join(__dirname, 'node_modules/borgnix-project-manager'))
+})
+
+gulp.task('git-install', function () {
+  var deps = require('./package.json').dependencies
+  var cmd = [ 'npm i'
+            , deps['arduino-compiler']
+            , deps['borgnix-project-manager']
+            ].join(' ')
+  exec(cmd)
 })
 
 gulp.task('default', ['watch'])

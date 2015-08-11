@@ -4,9 +4,11 @@
   "projectRoot": "/path/to/store/user/projects",
   "uploadDir": "/path/to/store/uploaded/files",
   "arduinoLibs": "/path/to/public/arduino/libraries",
+  "singleUser": true,
   "session": {
     "secret": "secret",
-    "redis": {
+    "store": {
+      "type": "redis",
       "host": "localhost",
       "port": 6379,
       "pass": null,

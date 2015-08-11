@@ -37,20 +37,23 @@ function newProjectDialog() {
               , token: 'token'
               , type: this.props.type
               , name: this.refs.newProjectName.getValue()
+              , tpl: this.state.selectedTpl
               }
-              bpm.newProject(opts, (data)=>{
-                this.setState({
-                  projects: this.state.projects.concat([data])
-                , selectedProject: data.name
-                })
-                pubsub.publish('clear_files')
-                this._showProject(data)
-                this.refs.newProjectDialog.dismiss()
-              })
+              this._createNewProject(opts)
             }
           }
         ]}>
       <TextField ref='newProjectName' floatingLabelText='Name'/>
+      <br/>
+      <SelectField
+          ref='newProjectTpl'
+          floatingLabelText='Template'
+          value={this.state.selectedTpl}
+          valueMember='name'
+          displayMember='name'
+          onChange={this._handleSelectFieldChange.bind(this, 'selectedTpl')}
+          menuItems={this.state.projectTpls}
+          />
     </Dialog>
   )
 }
@@ -64,7 +67,6 @@ function newFileDialog() {
           { text: 'Cancel' }
         , { text: 'Create'
           , onTouchTap: ()=>{
-              // console.log(this)
               let filename = this.refs.newFileName.getValue()
               this._createNewFile([filename], ()=>{
                 this.refs.newFileDialog.dismiss()
@@ -135,6 +137,10 @@ class ProjectManager extends React.Component {
       projects: []
     , selectedProject: null
     , snackbarMsg: 'File Saved'
+    , selectedTpl: 'default'
+    , projectTpls: [
+        {name: 'default'}
+      ]
     , libs: {
         userLibs: []
       , ideLibs: []
@@ -195,6 +201,13 @@ class ProjectManager extends React.Component {
       // console.log('libs', data)
       this.setState({
         libs: data.content
+      })
+    })
+
+    bpm.listTpls(this.props.type, (tpls)=>{
+      console.log(tpls)
+      this.setState({
+        projectTpls: tpls
       })
     })
 
@@ -298,11 +311,14 @@ class ProjectManager extends React.Component {
     })
   }
 
-  _createNewProject(topic, opts) {
-    bpm.newProject(opts, (res)=>{
+  _createNewProject(opts) {
+    bpm.newProject(opts, (data)=>{
       this.setState({
-        projects: this.state.projects.concat([res])
+        projects: this.state.projects.concat([data])
+      , selectedProject: data.name
       })
+      pubsub.publish('clear_files')
+      this._showProject(data)
       this.refs.newProjectDialog.dismiss()
     })
   }
@@ -469,8 +485,11 @@ class ProjectManager extends React.Component {
     let newState = {}
     newState[key] = e.target.value
     this.setState(newState)
-    pubsub.publish('clear_files')
-    this._showProject(_.find(this.state.projects, {name: e.target.value}))
+
+    if (key === 'selectedProject') {
+      pubsub.publish('clear_files')
+      this._showProject(_.find(this.state.projects, {name: e.target.value}))
+    }
   }
 
   getChildContext() {
