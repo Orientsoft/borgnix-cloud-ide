@@ -16,7 +16,7 @@ class BoardSelect extends React.Component {
   }
 
   componentDidMount() {
-    let bac = new BAC({ host: '', prefix: '/c'})
+    let bac = new BAC({ host: '', prefix: 'c'})
       , self = this
 
     bac.getBoards(function (res) {
