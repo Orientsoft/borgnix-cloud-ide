@@ -56,7 +56,7 @@ gulp.task('uglify', function () {
 
 gulp.task('watch', function () {
   var bundler = browserify({
-    entries: ['./app-new-ui/main.js']
+    entries: ['./app-reflux/main.js']
   , transform: [babelify]
   , debug: true
   , cache: {}
@@ -69,6 +69,7 @@ gulp.task('watch', function () {
   watcher.build = function () {
     console.log('start build')
     watcher.bundle()
+           .on('error', printErrorStack)
            .pipe(source('main.js'))
           //  .pipe(streamify(uglify.js()))
            .pipe(gulp.dest('./public/js'))
@@ -80,9 +81,9 @@ gulp.task('watch', function () {
            console.log('building took:', time)
          })
 
-  gulp.watch('./less/**.less', ['less'])
-
   watcher.build()
+
+  gulp.watch('./less/**.less', ['less'])
   gulp.start('less')
 })
 
