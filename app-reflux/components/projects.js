@@ -2,8 +2,6 @@ import React from 'react'
 import ProjectStore from '../stores/project-store'
 import _ from 'lodash'
 
-import projectTests from '../test/projects-test'
-
 class Projects extends React.Component {
   constructor(props) {
     super(props)
@@ -18,11 +16,6 @@ class Projects extends React.Component {
       console.log('component get', state)
       this.setState(state)
     }.bind(this))
-    // projectTests.createProject()
-    // setTimeout(function () {
-    //   projectTests.removeProject()
-    // }, 3000)
-
   }
 
   componentWillUnmount() {

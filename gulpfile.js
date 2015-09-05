@@ -55,8 +55,9 @@ gulp.task('uglify', function () {
 })
 
 gulp.task('watch', function () {
+  var file = 'test.js'
   var bundler = browserify({
-    entries: ['./app-reflux/main.js']
+    entries: ['./app-reflux/' + file]
   , transform: [babelify]
   , debug: true
   , cache: {}
@@ -70,7 +71,7 @@ gulp.task('watch', function () {
     console.log('start build')
     watcher.bundle()
            .on('error', printErrorStack)
-           .pipe(source('main.js'))
+           .pipe(source(file))
           //  .pipe(streamify(uglify.js()))
            .pipe(gulp.dest('./public/js'))
   }
