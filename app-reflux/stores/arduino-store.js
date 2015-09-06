@@ -12,22 +12,35 @@ let bac = new BAC({
 , prefix: 'c'
 })
 
+let state = {
+  uuid: '48ac25e0-1595-11e5-85e7-fb8c26f6437d'
+, token: 'e29450986df2d1c6318656c52be7a96cc3da6b66'
+, board: 'uno'
+}
+
 let arduinoStore = Reflux.createStore({
   listenables: arduinoActions
-, state: {
-    uuid: '48ac25e0-1595-11e5-85e7-fb8c26f6437d'
-  , token: 'e29450986df2d1c6318656c52be7a96cc3da6b66'
-  }
-, onCompile: function (opts) {
+
+, onCompile: function (projectName) {
+    let opts = {
+      type: 'arduino'
+    , name: projectName
+    , board: state.board
+    }
     bac.compile(opts, (data)=>{
-      this.state.result = data.status
-      this.state.message = data.content[data.status === 0 ? 'stdout' : 'stderr']
-      this.trigger(this.state)
+      state.result = data.status
+      state.message = data.content[data.status === 0 ? 'stdout' : 'stderr']
+      this.trigger(state)
     })
   }
+
+, onSetBoard: function (board) {
+    state.board = board
+  }
+
 , onUpload: function (name, board, port) {
     console.log(port)
-    let self = this
+    // let self = this
     let hexOpts = {
       name: name
     , board: board
@@ -38,8 +51,8 @@ let arduinoStore = Reflux.createStore({
       console.log('get hex:', data)
       let client = mqtt.connect(
         'ws://z.borgnix.com:2883'
-      , { username: self.state.uuid
-        , password: self.state.token
+      , { username: state.uuid
+        , password: state.token
         }
       )
       client.on('connect', function () {

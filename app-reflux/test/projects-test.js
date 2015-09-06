@@ -1,5 +1,5 @@
-import ProjectActions from '../actions/project-actions'
-import ProjectStore from '../stores/project-store'
+import projectActions from '../actions/project-actions'
+import projectStore from '../stores/project-store'
 import arduinoStore from '../stores/arduino-store'
 import arduinoActions from '../actions/arduino-actions'
 
@@ -8,7 +8,7 @@ let projectTests = {}
 let projectState = {}
   , arduinoState = {}
 
-ProjectStore.listen((newState)=>{
+projectStore.listen((newState)=>{
   console.log('update', newState)
   projectState = newState
 })
@@ -19,16 +19,16 @@ arduinoStore.listen((newState)=>{
 })
 
 projectTests.createProject = function () {
-  ProjectActions.createProject({
+  projectActions.createProject({
     name: 'test' + Date.now()
   , tpl: 'default'
   })
 }
 
 projectTests.removeProject = function () {
-  // console.log(ProjectStore.state.projects)
+  // console.log(projectStore.state.projects)
   console.log('remove', projectState)
-  ProjectActions.removeProject(ProjectStore.state.activeProjectName)
+  projectActions.removeProject(projectStore.state.activeProjectName)
 }
 
 projectTests.upload = function () {

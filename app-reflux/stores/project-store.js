@@ -2,17 +2,38 @@ import Reflux from 'reflux'
 import ProjectActions from '../actions/project-actions'
 import BPM from 'borgnix-project-manager/client'
 import _ from 'lodash'
+import path from 'path'
 
 let bpm = new BPM({
   host: ''
 , prefix: '/p'
 })
 
+let state = {
+  projects: []
+, activeProjectName: null
+}
+
 let ProjectStore = Reflux.createStore({
   listenables: ProjectActions
-, state: {
-    projects: []
-  , activeProjectName: null
+
+, get state() {
+    return state
+  }
+
+  // do not allow changing state directly
+, set state(newState) {
+    console.warn('Please don\'t change state directly.')
+  }
+
+, getActiveProject() {
+    return this.getProjectByName(state.activeProjectName)
+  }
+
+, getProjectByName(name) {
+    return _.find(state.projects, (project)=>{
+      return project.name === name
+    })
   }
 
 , onListProjects: function () {
@@ -23,26 +44,29 @@ let ProjectStore = Reflux.createStore({
     , type: 'arduino'
     }
     bpm.listProject(opts, (data) => {
-      this.state.projects = data.map((project)=>{
+      state.projects = data.map((project)=>{
         project.files = project.files.map((file)=>{
           file.open = false
           return file
         })
         return project
       })
-      this.state.activeProjectName = this.state.activeProjectName
-                                     || this.state.projects[0].name
-      console.log(this.state)
-      this.trigger(this.state)
+      state.activeProjectName = state.activeProjectName
+                                || state.projects[0].name
+      console.log(state)
+      this.trigger(state)
     })
   }
 
-, onCreateProject(opts) {
-    opts.type = 'arduino'
+, onCreateProject(name) {
+    let opts = {
+      type: 'arduino'
+    , name: name
+    }
     bpm.newProject(opts, (data)=>{
-      this.state.projects = this.state.projects.concat([data])
-      this.state.activeProjectIdx = this.state.projects.length - 1
-      this.trigger(this.state)
+      state.projects = state.projects.concat([data])
+      state.activeProjectIdx = state.projects.length - 1
+      this.trigger(state)
     })
   }
 
@@ -55,22 +79,83 @@ let ProjectStore = Reflux.createStore({
     bpm.deleteProject(opts, ()=>{
       console.log('deleted', opts)
       console.log(this)
-      _.remove(this.state.projects, (project)=>{
+      _.remove(state.projects, (project)=>{
         return opts.name === project.name
       })
-      if (this.state.projects.length === 0)
-        this.state.activeProjectName = null
-      else if (this.state.activeProjectName === opts.name)
-        this.state.activeProjectName = this.state.projects[0].name
-      this.trigger(this.state)
+      if (state.projects.length === 0)
+        state.activeProjectName = null
+      else if (state.activeProjectName === opts.name)
+        state.activeProjectName = state.projects[0].name
+      this.trigger(state)
     })
   }
 
 , onSwitchProject(name) {
-    if (_.find(this.state.projects, (project)=>{return project.name === name}))
-      this.state.activeProjectName = name
-    this.trigger(this.state)
+    if (_.find(state.projects, (project)=>{return project.name === name}))
+      state.activeProjectName = name
+    this.trigger(state)
   }
+
+, onCreateFile(filename, cb) {
+    console.log(filename)
+    let self = this
+    let project = this.getActiveProject()
+    console.log(project)
+    if (_.find(project.files, (file)=>{return file.name === filename})) {
+      if (_.isFunction(cb)) cb(new Error('file already exists'))
+    }
+    else {
+      let opts = {
+        type: 'arduino'
+      , name: state.activeProjectName
+      , files: [{
+          name: path.basename(filename)
+        , content: ''
+        , root: path.dirname(filename)}
+        ]
+      }
+      console.log(opts)
+      bpm.saveFiles(opts, (res)=>{
+        console.log(res)
+        project.files.push(opts.files[0])
+        self._sortByName(project.files, ()=>{
+          self.trigger(state)
+          if (_.isFunction(cb)) cb(null)
+        })
+      })
+    }
+  }
+
+, onSaveFiles(files) {
+    console.log(files)
+    let project = this.getActiveProject()
+    project.files = project.files.map((projectFile)=>{
+      return _.find(files, (file)=>{
+        return file.name === projectFile.name
+      }) || projectFile
+    })
+    this.trigger(state)
+  }
+
+, onRemoveFile(file) {
+    let opts = {
+      type: 'arduino'
+    , name: state.activeProjectName
+    , files: [file]
+    }
+    console.log(opts)
+    bpm.deleteFiles(opts)
+    _.remove(this.getProjectByName(opts.name).files, (projectFile)=>{
+      return projectFile.name === file.name
+    })
+    this.trigger(state)
+  }
+
+, _sortByName(arrayToSort, cb) {
+    arrayToSort = _.sortByOrder(arrayToSort, ['name'], ['asc'])
+    if (_.isFunction(cb)) cb()
+  }
+
 })
 
 export default ProjectStore

@@ -21,7 +21,7 @@
   "rules": {
     "quotes": [2, "single"],
     "semi": [2, "never"],
-    "curly": [2, "multi"],
+    "curly": [0, "multi"],
     "no-underscore-dangle": 0,
     "no-console": 0,
     "no-extend-native": 0,
