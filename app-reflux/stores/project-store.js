@@ -36,6 +36,12 @@ let ProjectStore = Reflux.createStore({
     })
   }
 
+, getFileByName(project, name) {
+    return _.find(project.files, (file)=>{
+      return file.name === name
+    })
+  }
+
 , onListProjects: function () {
     console.log('start listing projects')
     let opts = {
@@ -134,6 +140,12 @@ let ProjectStore = Reflux.createStore({
         return file.name === projectFile.name
       }) || projectFile
     })
+    let opts = {
+      type: 'arduino'
+    , name: project.name
+    , files: files
+    }
+    bpm.saveFiles(opts)
     this.trigger(state)
   }
 
@@ -148,6 +160,13 @@ let ProjectStore = Reflux.createStore({
     _.remove(this.getProjectByName(opts.name).files, (projectFile)=>{
       return projectFile.name === file.name
     })
+    this.trigger(state)
+  }
+
+, onChangeFile(file) {
+    let project = this.getActiveProject()
+    let fileToChange = this.getFileByName(project, file.name)
+    _.assign(fileToChange, file)
     this.trigger(state)
   }
 

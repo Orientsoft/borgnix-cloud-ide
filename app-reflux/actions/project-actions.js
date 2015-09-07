@@ -8,6 +8,7 @@ let ProjectActions = Reflux.createActions([
 , 'createFile'
 , 'removeFile'
 , 'saveFiles'
+, 'changeFile'
 ])
 
 export default ProjectActions

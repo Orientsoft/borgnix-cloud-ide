@@ -4,6 +4,7 @@ import projectStore from '../stores/project-store'
 import arduinoActions from '../actions/arduino-actions'
 import arduinoStore from '../stores/arduino-store'
 import _ from 'lodash'
+import Editor from './editor'
 // import Projects from './projects'
 
 class TestApp extends React.Component {
@@ -29,7 +30,6 @@ class TestApp extends React.Component {
   }
 
   getActiveProject() {
-    console.log('inside', this)
     let state = this.state
     return _.find(state.projects, (project)=>{
       return project.name === state.activeProjectName
@@ -140,10 +140,10 @@ class TestApp extends React.Component {
                 <div>
                   <h3>{activeFile.name}</h3>
                   <span>------------- start ---------------</span>
-                  <p>
-                    {activeFile.content}
-                  </p>
-                  <span>--------- end -------------</span>
+                  <div>
+                    <Editor />
+                  </div>
+                  <span>-------------  end  ---------------</span>
                 </div>
               )
             }.call(this)
