@@ -13,8 +13,10 @@ class Editor extends React.Component {
   componentDidMount() {
     this.refs.ace.editor.on('change', function (e) {
       // projectActions.changeFile()
+
       console.log(e.data)
-    })
+      console.log(this.getValue())
+    }.bind(this.refs.ace.editor))
   }
 
   render() {
