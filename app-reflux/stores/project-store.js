@@ -12,6 +12,7 @@ let bpm = new BPM({
 let state = {
   projects: []
 , activeProjectName: null
+, activeFileName: null
 }
 
 let ProjectStore = Reflux.createStore({
@@ -31,15 +32,11 @@ let ProjectStore = Reflux.createStore({
   }
 
 , getProjectByName(name) {
-    return _.find(state.projects, (project)=>{
-      return project.name === name
-    })
+    return _.find(state.projects, {name: name})
   }
 
 , getFileByName(project, name) {
-    return _.find(project.files, (file)=>{
-      return file.name === name
-    })
+    return _.find(project.files, {name: name})
   }
 
 , onListProjects: function () {
@@ -59,6 +56,8 @@ let ProjectStore = Reflux.createStore({
       })
       state.activeProjectName = state.activeProjectName
                                 || state.projects[0].name
+      state.activeFileName = state.activeFileName
+                             || this.getActiveProject().files[0].name
       console.log(state)
       this.trigger(state)
     })
@@ -97,8 +96,11 @@ let ProjectStore = Reflux.createStore({
   }
 
 , onSwitchProject(name) {
-    if (_.find(state.projects, (project)=>{return project.name === name}))
+    if (_.find(state.projects, {name: name})
+        && state.activeProjectName !== name) {
       state.activeProjectName = name
+      state.activeFileName = this.getActiveProject().files[0].name
+    }
     this.trigger(state)
   }
 
@@ -136,9 +138,7 @@ let ProjectStore = Reflux.createStore({
     console.log(files)
     let project = this.getActiveProject()
     project.files = project.files.map((projectFile)=>{
-      return _.find(files, (file)=>{
-        return file.name === projectFile.name
-      }) || projectFile
+      return _.find(files, {name: projectFile.name}) || projectFile
     })
     let opts = {
       type: 'arduino'
@@ -157,9 +157,7 @@ let ProjectStore = Reflux.createStore({
     }
     console.log(opts)
     bpm.deleteFiles(opts)
-    _.remove(this.getProjectByName(opts.name).files, (projectFile)=>{
-      return projectFile.name === file.name
-    })
+    _.remove(this.getProjectByName(opts.name).files, {name: file.name})
     this.trigger(state)
   }
 
@@ -168,6 +166,21 @@ let ProjectStore = Reflux.createStore({
     let fileToChange = this.getFileByName(project, file.name)
     _.assign(fileToChange, file)
     this.trigger(state)
+  }
+
+, onSwitchFile(filename) {
+    if (_.find(this.getActiveProject().files, {name: filename})) {
+      state.activeFileName = filename
+      this.trigger(state)
+    }
+  }
+
+, onOpenFile(filename) {
+    this.getFileByName(filename).open = true
+  }
+
+, onCloseFile(filename) {
+    this.getFileByName(filename).open = false
   }
 
 , _sortByName(arrayToSort, cb) {

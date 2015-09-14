@@ -64,7 +64,22 @@ class TestApp extends React.Component {
                 <ul>
                 {
                   project.files.map((file)=>{
-                    return <li>{file.name}</li>
+                    return (
+                      <li>
+                      <button
+                          style={{
+                            backgroundColor:
+                              this.state.activeFileName === file.name
+                            ? 'red'
+                            : 'white'
+                          }}
+                          onClick={
+                              projectActions.switchFile.bind(null, file.name)
+                          }>
+                        {file.name}
+                      </button>
+                      </li>
+                    )
                   })
                 }
                 </ul>
@@ -133,9 +148,9 @@ class TestApp extends React.Component {
 
           {
             function () {
-              let activeProject = this.getActiveProject()
-              let activeFile = activeProject ? activeProject.files[0]
-                                             : {name: null, content: null}
+              let activeProject = this.getActiveProject() || {files: []}
+              let activeFile = _.find(activeProject.files, {name: this.state.activeFileName}) ||
+                             {name: null, content: null}
               return (
                 <div>
                   <h3>{activeFile.name}</h3>

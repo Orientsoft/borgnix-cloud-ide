@@ -16,6 +16,8 @@ let state = {
   uuid: '48ac25e0-1595-11e5-85e7-fb8c26f6437d'
 , token: 'e29450986df2d1c6318656c52be7a96cc3da6b66'
 , board: 'uno'
+, debugPort: ''
+, uploadPort: ''
 }
 
 let arduinoStore = Reflux.createStore({
@@ -88,6 +90,14 @@ let arduinoStore = Reflux.createStore({
         client.publish('upload/start')
       })
     })
+  }
+
+, onStartDebug() {
+    console.log('start debug')
+  }
+
+, onStopDebug() {
+    console.log('stop debug')
   }
 })
 

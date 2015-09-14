@@ -1,6 +1,8 @@
 import AceEditor from 'react-ace'
 import React from 'react'
-// import projectActions from '../actions/project-actions'
+import projectActions from '../actions/project-actions'
+import 'brace/mode/c_cpp'
+import 'brace/theme/tomorrow'
 
 class Editor extends React.Component {
   constructor(props) {
@@ -16,6 +18,7 @@ class Editor extends React.Component {
 
       console.log(e.data)
       console.log(this.getValue())
+      projectActions.saveFiles()
     }.bind(this.refs.ace.editor))
   }
 
