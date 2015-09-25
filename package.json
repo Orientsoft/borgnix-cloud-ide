@@ -33,7 +33,7 @@
     "pubsub-js": "^1.5.2",
     "react": "^0.13.3",
     "react-ace": "^2.0.1",
-    "react-bootstrap": "^0.23.7",
+    "react-bootstrap": "^0.25.2",
     "react-tap-event-plugin": "^0.1.7",
     "redis": "^0.12.1",
     "reflux": "^0.2.12",

@@ -36,11 +36,12 @@ let ProjectStore = Reflux.createStore({
   }
 
 , getFileByName(project, name) {
-    return _.find(project.files, {name: name})
+    return project ? _.find(project.files, {name: name}) : null
   }
 
 , onListProjects: function () {
     console.log('start listing projects')
+    // let self = this
     let opts = {
       uuid: 'uuid'
     , token: 'token'
@@ -48,8 +49,10 @@ let ProjectStore = Reflux.createStore({
     }
     bpm.listProject(opts, (data) => {
       state.projects = data.map((project)=>{
+        let oldProject = this.getProjectByName(project.name)
         project.files = project.files.map((file)=>{
-          file.open = false
+          let oldFile = this.getFileByName(oldProject, file.name)
+          file.open = oldFile ? oldFile.open : false
           return file
         })
         return project
@@ -84,9 +87,7 @@ let ProjectStore = Reflux.createStore({
     bpm.deleteProject(opts, ()=>{
       console.log('deleted', opts)
       console.log(this)
-      _.remove(state.projects, (project)=>{
-        return opts.name === project.name
-      })
+      _.remove(state.projects, {name: opts.name})
       if (state.projects.length === 0)
         state.activeProjectName = null
       else if (state.activeProjectName === opts.name)
@@ -99,7 +100,11 @@ let ProjectStore = Reflux.createStore({
     if (_.find(state.projects, {name: name})
         && state.activeProjectName !== name) {
       state.activeProjectName = name
-      state.activeFileName = this.getActiveProject().files[0].name
+      // state.activeFileName = this.getActiveProject().files[0].name
+      if (!_.find(this.getActiveProject().files, {open: true})) {
+        this.getActiveProject().files[0].open = true
+      }
+      state.activeFileName = _.find(this.getActiveProject().files, {open: true}).name
     }
     this.trigger(state)
   }
@@ -109,7 +114,7 @@ let ProjectStore = Reflux.createStore({
     let self = this
     let project = this.getActiveProject()
     console.log(project)
-    if (_.find(project.files, (file)=>{return file.name === filename})) {
+    if (_.find(project.files, {name: filename})) {
       if (_.isFunction(cb)) cb(new Error('file already exists'))
     }
     else {
@@ -170,17 +175,18 @@ let ProjectStore = Reflux.createStore({
 
 , onSwitchFile(filename) {
     if (_.find(this.getActiveProject().files, {name: filename})) {
+      this.getFileByName(this.getActiveProject(), filename).open = true
       state.activeFileName = filename
       this.trigger(state)
     }
   }
 
 , onOpenFile(filename) {
-    this.getFileByName(filename).open = true
+    this.getFileByName(this.getActiveProject(), filename).open = true
   }
 
 , onCloseFile(filename) {
-    this.getFileByName(filename).open = false
+    this.getFileByName(this.getActiveProject(), filename).open = false
   }
 
 , _sortByName(arrayToSort, cb) {

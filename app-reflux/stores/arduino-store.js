@@ -37,6 +37,7 @@ let arduinoStore = Reflux.createStore({
   }
 
 , onSetBoard: function (board) {
+    // add validation here
     state.board = board
   }
 
@@ -59,13 +60,13 @@ let arduinoStore = Reflux.createStore({
       )
       client.on('connect', function () {
         console.log('mqtt connected')
-        var msp = new SerialPort({
+        let msp = new SerialPort({
           client: client
         , transmitTopic: 'upload/in'
         , receiveTopic: 'upload/out'
         })
         let hex = intelHex.parse(data).data
-        var uno = require('arduino-compiler/data/boards').uno
+        let uno = require('arduino-compiler/data/boards').uno
         let param = {
           name: 'uno'
         , baud: parseInt(uno.upload.speed)
