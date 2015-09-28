@@ -45,18 +45,14 @@ let ProjectStore = Reflux.createStore({
   }
 
 , onListProjects: function (cb) {
-    console.log('start listing projects')
-    // let self = this
     let opts = {
       uuid: 'uuid'
     , token: 'token'
     , type: 'arduino'
     }
     bpm.listProject(opts, (projects) => {
-      console.log('check', projects)
       state.projects = projects.map((project)=>{
         let oldProject = getProjectByName(project.name)
-        console.log(project)
         project.files = project.files.map((file)=>{
           let oldFile = getFileByName(oldProject, file.name)
           file.open = oldFile ? oldFile.open : false
@@ -88,7 +84,6 @@ let ProjectStore = Reflux.createStore({
         return file
       })
       state.projects = state.projects.concat([newProject])
-      console.log('see me', state.projects)
       state.activeProjectIdx = state.projects.length - 1
       state.activeProjectName = newProject.name
       state.activeFileName = newProject.files[0].name
@@ -103,8 +98,6 @@ let ProjectStore = Reflux.createStore({
     , name: name
     }
     bpm.deleteProject(opts, ()=>{
-      console.log('deleted', opts)
-      console.log(this)
       _.remove(state.projects, {name: opts.name})
       if (state.projects.length === 0)
         state.activeProjectName = null
@@ -127,10 +120,8 @@ let ProjectStore = Reflux.createStore({
   }
 
 , onCreateFile(filename, cb) {
-    console.log(filename)
     let self = this
     let project = getActiveProject()
-    console.log(project)
     if (_.find(project.files, {name: filename})) {
       if (_.isFunction(cb)) cb(new Error('file already exists'))
     }
@@ -144,9 +135,9 @@ let ProjectStore = Reflux.createStore({
         , root: path.dirname(filename)}
         ]
       }
-      console.log(opts)
       bpm.saveFiles(opts, (res)=>{
-        console.log(res)
+        if (res.status !== 0)
+          console.error(res)
         let file = opts.files[0]
         file.open = true
         project.files.push(opts.files[0])
@@ -160,10 +151,8 @@ let ProjectStore = Reflux.createStore({
   }
 
 , onSaveFiles(files) {
-    console.log(files)
     let project = getActiveProject()
     project.files = project.files.map((projectFile)=>{
-      // return _.find(files, {name: projectFile.name}) || projectFile
       _.assign(projectFile, _.find(files, {name: projectFile.name}) || {})
       return projectFile
     })
@@ -182,7 +171,6 @@ let ProjectStore = Reflux.createStore({
     , name: state.activeProjectName
     , files: [file]
     }
-    console.log(opts)
     bpm.deleteFiles(opts)
     _.remove(getProjectByName(opts.name).files, {name: file.name})
     this.trigger(state)

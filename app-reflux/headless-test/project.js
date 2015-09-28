@@ -1,6 +1,5 @@
 import actions from '../actions/project-actions'
 import store from '../stores/project-store'
-import sinon from 'sinon'
 import {expect} from 'chai'
 import _ from 'lodash'
 
@@ -118,11 +117,8 @@ describe('Project Store', () => {
   describe('close file', () => {
     it('should close an opened file in the active project', (done) => {
       let fileToClose = _.find(getActiveProject(state).files, {open: true})
-      console.log('actice', getActiveProject(state))
       expect(fileToClose).to.exists
-      console.log('close it', fileToClose)
       listenCallback = (newState) => {
-        console.log('closed', newState)
         expect(
           _.find(getActiveProject(newState).files, {name: fileToClose.name}).open
         ).to.be.false
@@ -199,6 +195,4 @@ describe('Project Store', () => {
       actions.removeProject(newProjectName)
     })
   })
-
-
 })
