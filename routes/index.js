@@ -10,4 +10,8 @@ router.get('/test', function (req, res) {
   res.render('index', { main: 'test' })
 })
 
+router.get('/mocha', function (req, res) {
+  res.render('test')
+})
+
 module.exports = router

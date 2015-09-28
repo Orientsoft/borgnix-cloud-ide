@@ -4,19 +4,24 @@ var gulp = require('gulp')
   , watchify = require('watchify')
   , source = require('vinyl-source-stream')
   , streamify = require('gulp-streamify')
-  , minifyify = require('minifyify')
   , less = require('gulp-less')
   , path = require('path')
   , fs = require('fs-extra')
-  , exec = require('child_process').exec
+  , child_process = require('child_process')
+  , exec = child_process.exec
+  , spawn = child_process.spawn
   , uglify = {
       js: require('gulp-uglify')
     , css: require('gulp-uglifycss')
     }
 
+var argv = require('minimist')(process.argv.slice(2))
+
 function printErrorStack(err) {
-  console.log(err.stack)
+  if (err) console.log(err.stack || err)
 }
+
+// move required resource in to vendor directory
 
 gulp.task('install', function () {
   gulp.src(['./node_modules/bootstrap/dist/**'])
@@ -25,11 +30,16 @@ gulp.task('install', function () {
     .pipe(gulp.dest('./public/vendor/material-design-icons'))
   gulp.src(['./config/default.json'])
     .pipe(gulp.dest('./config'))
+  // gulp.src(['./node_modules/highlight.js/styles/**'])
+  //   .pipe(gule.dest('./public/vendor/highlight.js'))
 })
+
+// usage: gulp production [-f filename(default: ./app-new-ui/main.js)]
+// build a minified bundle against the given entry file
 
 gulp.task('production', function () {
   browserify({
-    entries: ['./app-new-ui/main.js']
+    entries: [argv.f || './app-new-ui/main.js']
   , transform: [babelify]
   , debug: false
   })
@@ -44,20 +54,14 @@ gulp.task('production', function () {
       .pipe(gulp.dest('./public/css'))
 })
 
-gulp.task('uglify', function () {
-  gulp.src('./public/js/**.js')
-      .pipe(uglify.js())
-      .pipe(gulp.dest('./public/js'))
-
-  gulp.src('./public/css/**.css')
-      .pipe(uglify.css())
-      .pipe(gulp.dest('./public/css'))
-})
+// usage: gulp watch [-f filename(default: ./app-reflux/test.js)]
+//                   [-o outputDir(default: ./public/js)]
 
 gulp.task('watch', function () {
-  var file = 'test.js'
+  var file = argv.f || './app-reflux/test.js'
+  var outdir = argv.o || './public/js'
   var bundler = browserify({
-    entries: ['./app-reflux/' + file]
+    entries: [file]
   , transform: [babelify]
   , debug: true
   , cache: {}
@@ -65,41 +69,31 @@ gulp.task('watch', function () {
   // , fullPaths: true
   })
 
+  console.log('Start watching', file)
+
   var watcher = watchify(bundler)
 
   watcher.build = function () {
-    console.log('start build')
+    console.log('Start building')
     watcher.bundle()
            .on('error', printErrorStack)
            .pipe(source(file))
-          //  .pipe(streamify(uglify.js()))
-           .pipe(gulp.dest('./public/js'))
+           .pipe(require('gulp-rename')({dirname: ''}))
+           .pipe(gulp.dest(outdir))
   }
 
   watcher.on('error', printErrorStack)
          .on('update', watcher.build)
          .on('time', function (time) {
-           console.log('building took:', time)
+           console.log('Finished building after', time, 'ms')
          })
 
   watcher.build()
-
-  gulp.watch('./less/**.less', ['less'])
-  gulp.start('less')
 })
 
-gulp.task('browserify', function () {
-  browserify({
-    entries: ['./app-new-ui/main.js']
-  , transform: [babelify]
-  , debug: true
-  , cache: {}
-  , packageCache: {}
-  , fullPaths: true
-  }).on('error', printErrorStack)
-    .bundle()
-    .pipe(source('main.js'))
-    .pipe(gulp.dest('./public/js'))
+gulp.task('watch-less', function () {
+  gulp.watch('./less/**.less', ['less'])
+  gulp.start('less')
 })
 
 gulp.task('less', function () {
@@ -107,6 +101,16 @@ gulp.task('less', function () {
       .pipe(less({paths: [path.join(__dirname, 'less')]}))
       .pipe(gulp.dest('./public/css'))
 })
+
+gulp.task('test', function () {
+  spawn('mocha', [ '--compilers'
+                 , 'js:babel/register'
+                 , 'app-reflux/headless-test'
+                 ], {stdio: 'inherit'})
+})
+
+// task link, unlink and git-install are used when modifying
+// borgnix-project-manager and borgnix-arduino-compiler
 
 gulp.task('link', function () {
   fs.symlink( path.join(__dirname, '../borgnix-arduino-compiler')

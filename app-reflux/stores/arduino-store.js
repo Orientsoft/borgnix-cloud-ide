@@ -58,7 +58,7 @@ let arduinoStore = Reflux.createStore({
         , password: state.token
         }
       )
-      client.on('connect', function () {
+      client.on('connect', () => {
         console.log('mqtt connected')
         let msp = new SerialPort({
           client: client
