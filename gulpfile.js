@@ -7,9 +7,11 @@ var gulp = require('gulp')
   , less = require('gulp-less')
   , path = require('path')
   , fs = require('fs-extra')
-  , child_process = require('child_process')
-  , exec = child_process.exec
-  , spawn = child_process.spawn
+  , childProcess = require('child_process')
+  , exec = childProcess.exec
+  , spawn = childProcess.spawn
+  , gutil = require('gulp-util')
+  , rename = require('gulp-rename')
   , uglify = {
       js: require('gulp-uglify')
     , css: require('gulp-uglifycss')
@@ -30,6 +32,8 @@ gulp.task('install', function () {
     .pipe(gulp.dest('./public/vendor/material-design-icons'))
   gulp.src(['./config/default.json'])
     .pipe(gulp.dest('./config'))
+  gulp.src(['./node_modules/babel-polyfill/dist/**'])
+    .pipe(gulp.dest('./public/vendor/babel-polyfill'))
   // gulp.src(['./node_modules/highlight.js/styles/**'])
   //   .pipe(gule.dest('./public/vendor/highlight.js'))
 })
@@ -38,14 +42,16 @@ gulp.task('install', function () {
 // build a minified bundle against the given entry file
 
 gulp.task('production', function () {
+  var file = argv.f || './app-new-ui/main.js'
   browserify({
-    entries: [argv.f || './app-new-ui/main.js']
+    entries: [file]
   , transform: [babelify]
   , debug: false
   })
   .bundle()
-  .pipe(source('main.js'))
+  .pipe(source(file))
   .pipe(streamify(uglify.js()))
+  .pipe(rename({dirname: ''}))
   .pipe(gulp.dest('./public/js'))
 
   gulp.src('./less/main.less')
@@ -66,29 +72,27 @@ gulp.task('watch', function () {
   , debug: true
   , cache: {}
   , packageCache: {}
-  // , fullPaths: true
   })
 
-  console.log('Start watching', file)
+  gutil.log('Start watching', file, 'output to', outdir)
 
   var watcher = watchify(bundler)
 
-  watcher.build = function () {
-    console.log('Start building')
+  function build() {
+    gutil.log('Start building')
     watcher.bundle()
            .on('error', printErrorStack)
            .pipe(source(file))
-           .pipe(require('gulp-rename')({dirname: ''}))
+           .pipe(rename({dirname: ''}))
            .pipe(gulp.dest(outdir))
   }
 
-  watcher.on('error', printErrorStack)
-         .on('update', watcher.build)
-         .on('time', function (time) {
-           console.log('Finished building after', time, 'ms')
+  watcher.on('update', build)
+         .on('time', (time) => {
+           gutil.log('Building time:', time, 'ms')
          })
 
-  watcher.build()
+  build()
 })
 
 gulp.task('watch-less', function () {
@@ -113,9 +117,9 @@ gulp.task('test', function () {
 // borgnix-project-manager and borgnix-arduino-compiler
 
 gulp.task('link', function () {
-  fs.symlink( path.join(__dirname, '../borgnix-arduino-compiler')
+  fs.symlinkSync( path.join(__dirname, '../borgnix-arduino-compiler')
             , path.join(__dirname, 'node_modules/arduino-compiler'))
-  fs.symlink( path.join(__dirname, '../borgnix-project-manager')
+  fs.symlinkSync( path.join(__dirname, '../borgnix-project-manager')
             , path.join(__dirname, 'node_modules/borgnix-project-manager'))
 })
 
@@ -130,6 +134,7 @@ gulp.task('git-install', function () {
             , deps['arduino-compiler']
             , deps['borgnix-project-manager']
             ].join(' ')
+  console.log(cmd)
   exec(cmd)
 })
 

@@ -7,6 +7,7 @@ var express = require('express')
   , multer = require('multer')
   , fs = require('fs-extra')
   , _ = require('underscore')
+  , NedbStore = require('borgnix-project-manager/lib/store/nedb')
 
 var routes = require('./routes/index')
 var users = require('./routes/users')
@@ -51,8 +52,10 @@ app.use(session({
 , saveUninitialized: false
 }))
 
-var arduino = require('arduino-compiler/router')(config)
-  , projects = require('borgnix-project-manager/router')(config)
+config.store = new NedbStore('nedb/projects')
+
+var arduino = require('arduino-compiler/lib/router')(config)
+  , projects = require('borgnix-project-manager/lib/router')(config)
 
 var auth = require('./routes/' + (config.singleUser ? 'single' : 'auth'))
 

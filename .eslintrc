@@ -1,4 +1,5 @@
 {
+  "parser": "babel-eslint",
   "rules": {
     "semi": 2
   },
@@ -16,7 +17,9 @@
     "react"
   ],
   "globals": {
-    "window": true
+    "window": true,
+    "describe": true,
+    "it": true
   },
   "rules": {
     "quotes": [2, "single"],
@@ -25,6 +28,8 @@
     "no-underscore-dangle": 0,
     "no-console": 0,
     "no-extend-native": 0,
+    "no-unused-expressions": 0,
+    "no-mixed-requires": 0,
     "new-cap": 0,
     "react/display-name": 0,
     "react/jsx-boolean-value": 1,

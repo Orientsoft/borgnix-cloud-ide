@@ -1,11 +1,12 @@
 import Reflux from 'reflux'
 import arduinoActions from '../actions/arduino-actions'
-// import _ from 'lodash'
 import mqtt from 'mqtt'
 import {SerialPort} from 'mqtt-serial'
 import intelHex from 'intel-hex'
 import stk500 from 'stk500'
 import BAC from 'arduino-compiler/client'
+import _ from 'lodash'
+import { MQTT_BROKER, AT_CMD } from '../lib/const'
 
 let bac = new BAC({
   host: ''
@@ -20,8 +21,73 @@ let state = {
 , uploadPort: ''
 }
 
+function reset(sp, cb) {
+  var timeout = 2000
+  sp.write(AT_CMD.GPIO_1)
+  setTimeout(function () {
+    sp.write(AT_CMD.GPIO_0)
+    setTimeout(function () {
+      sp.write(AT_CMD.GPIO_1)
+      if (_.isFunction(cb)) cb()
+    }, timeout)
+  }, timeout)
+}
+
+function upload(uuid, token, hexFile, board, cb) {
+  let client = mqtt.connect(
+    MQTT_BROKER
+  , { username: uuid
+    , password: token
+    }
+  )
+  client.on('connect', () => {
+    console.log('mqtt connected')
+    // var topicIn = `/devices/${uuid}/in`
+    //   , topicOut = `/devices/${uuid}/out`
+
+    let msp = new SerialPort({
+      client: client
+    , transmitTopic: `/devices/${uuid}/in`
+    , receiveTopic: `/devices/${uuid}/out`
+    })
+    let hex = intelHex.parse(hexFile).data
+    let uno = require('arduino-compiler/data/boards').uno
+    let param = {
+      name: 'uno'
+    , baud: parseInt(uno.upload.speed)
+    , signature: new Buffer(uno.signature, 'hex')
+    , pageSize: 128
+    , timeout: 1000
+    }
+    var connected = false
+    msp.on('data', (data) => {
+      if (data.toString() === 'ESP PING_RSP' && !connected) {
+        connected = true
+        console.log('reseted')
+        reset(msp, function () {
+          stk500.bootload(msp, hex, param, function (uploadError) {
+            if (uploadError)
+              console.log('bootload error', uploadError)
+            else {
+              console.log('upload finished')
+              // client.publish('upload/finished')
+              msp.end()
+              if (_.isFunction(cb)) cb()
+            }
+          })
+        })
+      }
+    })
+    msp.write(AT_CMD.PING)
+  })
+}
+
 let arduinoStore = Reflux.createStore({
   listenables: arduinoActions
+
+, onListPorts: function () {
+    //
+  }
 
 , onCompile: function (projectName) {
     let opts = {
@@ -41,7 +107,7 @@ let arduinoStore = Reflux.createStore({
     state.board = board
   }
 
-, onUpload: function (name, board, port) {
+, onUpload: function (name, board, port, cb) {
     console.log(port)
     // let self = this
     let hexOpts = {
@@ -50,46 +116,12 @@ let arduinoStore = Reflux.createStore({
     , type: 'arduino'
     }
     bac.getHex(hexOpts, (err, data)=>{
-      if (err) console.log(err)
-      console.log('get hex:', data)
-      let client = mqtt.connect(
-        'ws://z.borgnix.com:2883'
-      , { username: state.uuid
-        , password: state.token
-        }
-      )
-      client.on('connect', () => {
-        console.log('mqtt connected')
-        let msp = new SerialPort({
-          client: client
-        , transmitTopic: 'upload/in'
-        , receiveTopic: 'upload/out'
-        })
-        let hex = intelHex.parse(data).data
-        let uno = require('arduino-compiler/data/boards').uno
-        let param = {
-          name: 'uno'
-        , baud: parseInt(uno.upload.speed)
-        , signature: new Buffer(uno.signature, 'hex')
-        , pageSize: 128
-        , timeout: 1000
-        }
-        client.on('message', function (topic) {
-          if (topic === 'upload/ready') {
-            console.log('reseted')
-            stk500.bootload(msp, hex, param, function (uploadError) {
-              if (uploadError)
-                console.log('bootload error', uploadError)
-              else {
-                console.log('upload finished')
-                client.publish('upload/finished')
-              }
-            })
-          }
-        })
-        client.subscribe('upload/ready')
-        client.publish('upload/start')
-      })
+      if (!err)
+        upload(state.uuid, state.token, data, board, cb)
+      else {
+        console.log(err)
+        if (_.isFunction(cb)) cb(err)
+      }
     })
   }
 

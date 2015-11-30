@@ -1,0 +1,12 @@
+{
+  "babelSourcePath":                  "app-reflux",
+  "babelTranspilePath":               "lib",
+  "createMap":                        false,
+  "createTargetDirectories":          false,
+  "createTranspiledCode":             false,
+  "disableWhenNoBabelrcFileInPath":   true,
+  "projectRoot":                      true,
+  "suppressSourcePathMessages":       true,
+  "suppressTranspileOnSaveMessages":  true,
+  "transpileOnSave":                  false
+}
