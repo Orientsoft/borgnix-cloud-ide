@@ -14,6 +14,25 @@ let state = {
 , activeFileName: null
 }
 
+function _dirExists(files, dirname) {
+  let dirs = files.filter((file) => {
+    return file.type === 'directory'
+  })
+  if (dirs.length === 0) return false
+
+  for (var dir of dirs)
+    if (dir.path === dirname)
+      return true
+
+  return dirs.reduce((pv, cv) => {
+    return pv || _dirExists(cv.children)
+  }, false)
+}
+
+function dirExists(project, dirname) {
+  return _dirExists(project.layout.children, dirname)
+}
+
 function getProjectByName(name) {
   return _.find(state.projects, {name: name})
 }
@@ -24,11 +43,6 @@ function getActiveProject() {
 
 function getFileByName(project, name) {
   return project ? _.find(project.files, {path: name}) : null
-}
-
-function _sortByName(arrayToSort, cb) {
-  arrayToSort = _.sortByOrder(arrayToSort, ['name'], ['asc'])
-  if (_.isFunction(cb)) cb()
 }
 
 let ProjectStore = Reflux.createStore({
@@ -49,7 +63,7 @@ let ProjectStore = Reflux.createStore({
 
     let res = await pm.listProjects(opts)
     if (res.status !== 0)
-      ProjectActions.listProjects.failed(res.content)
+      return ProjectActions.listProjects.failed(res.content)
 
     state.projects = res.content.map((project) => {
       project.files = project.files.map((file)=>{
@@ -66,7 +80,7 @@ let ProjectStore = Reflux.createStore({
       = state.activeFileName || _.get(getActiveProject(), 'files[0].path')
     this.trigger(state)
 
-    ProjectActions.listProjects.completed()
+    return ProjectActions.listProjects.completed()
   }
 
 , onCreateProject: async function(name, tpl) {
@@ -77,7 +91,7 @@ let ProjectStore = Reflux.createStore({
     }
     let res = await pm.createProject(opts)
     if (res.status !== 0)
-      ProjectActions.createProject.failed(res.content)
+      return ProjectActions.createProject.failed(res.content)
 
     let project = res.content
     project.files = project.files.map((file, i) => {
@@ -89,43 +103,45 @@ let ProjectStore = Reflux.createStore({
     state.activeFileName = _.get(project, 'files[0].path')
 
     this.trigger(state)
-    ProjectActions.createProject.completed()
+    return ProjectActions.createProject.completed()
   }
 
 , onRemoveProject: async function(name) {
+    if (!getProjectByName(name))
+      return ProjectActions.removeProject.failed('Project Not Found')
     let opts = {
       type: 'arduino'
     , name: name
     }
     let res = await pm.deleteProject(opts)
     if (res.status !== 0)
-      ProjectActions.removeProject.failed(res.content)
+      return ProjectActions.removeProject.failed(res.content)
 
     _.remove(state.projects, {name: opts.name})
     if (state.activeProjectName === opts.name)
       state.activeProjectName = _.get(state, 'projects[0].name')
     this.trigger(state)
-    ProjectActions.removeProject.completed()
+    return ProjectActions.removeProject.completed()
   }
 
 , onSwitchProject(name) {
-    if (_.find(state.projects, {name: name})
-        && state.activeProjectName !== name) {
+    let project = getActiveProject()
+    if (project && state.activeProjectName !== name) {
       state.activeProjectName = name
-      if (!_.find(getActiveProject().files, {open: true})) {
-        getActiveProject().files[0].open = true
+      if (!_.find(project.files, {open: true})) {
+        project.files[0].open = true
       }
-      state.activeFileName = _.find(getActiveProject().files, {open: true}).path
+      state.activeFileName = _.find(project.files, {open: true}).path
     }
     this.trigger(state)
-    ProjectActions.switchProject.completed()
+    return ProjectActions.switchProject.completed()
   }
 
 , onCreateFile: async function(filename) {
     let project = getActiveProject()
 
     if (getFileByName(project, filename))
-      ProjectActions.createFile.failed('file already exists')
+      return ProjectActions.createFile.failed('file already exists')
 
     let opts = {
       type: 'arduino'
@@ -137,7 +153,9 @@ let ProjectStore = Reflux.createStore({
     }
     let res = await pm.createFile(opts)
     if (res.status !== 0)
-      ProjectActions.createFile.failed(res.content)
+      return ProjectActions.createFile.failed(res.content)
+
+    getProjectByName(opts.name).layout = res.content
 
     let file = opts.files[0]
     file.open = true
@@ -145,7 +163,7 @@ let ProjectStore = Reflux.createStore({
     state.activeFileName = file.path
 
     this.trigger(state)
-    ProjectActions.createFile.completed()
+    return ProjectActions.createFile.completed()
   }
 
 , onSaveFiles: async function(files) {
@@ -163,10 +181,10 @@ let ProjectStore = Reflux.createStore({
 
     let res = await pm.updateFiles(opts)
     if (res.status !== 0)
-      ProjectActions.saveFiles.failed(res.content)
+      return ProjectActions.saveFiles.failed(res.content)
 
     this.trigger(state)
-    ProjectActions.saveFiles.completed()
+    return ProjectActions.saveFiles.completed()
   }
 
 , onRemoveFile: async function(file) {
@@ -177,12 +195,15 @@ let ProjectStore = Reflux.createStore({
     }
     let res = await pm.deleteFiles(opts)
     if (res.status !== 0)
-      ProjectActions.removeFile.failed(res.content)
+      return ProjectActions.removeFile.failed(res.content)
 
-    _.remove(getProjectByName(opts.name).files, {path: file.path})
+    let project = getProjectByName(opts.name)
+    project.layout = res.content
+
+    _.remove(project.files, {path: file.path})
 
     this.trigger(state)
-    ProjectActions.removeFile.completed()
+    return ProjectActions.removeFile.completed()
   }
 
 , onChangeFile(file) {
@@ -191,28 +212,67 @@ let ProjectStore = Reflux.createStore({
     _.assign(fileToChange, file)
 
     this.trigger(state)
-    ProjectActions.changeFile.completed()
+    return ProjectActions.changeFile.completed()
   }
 
 , onSwitchFile(filename) {
-    if (getFileByName(getActiveProject(), filename)) {
-      getFileByName(getActiveProject(), filename).open = true
+    let project = getActiveProject()
+    if (getFileByName(project, filename)) {
+      getFileByName(project, filename).open = true
       state.activeFileName = filename
       this.trigger(state)
     }
-    ProjectActions.changeFile.completed()
+    return ProjectActions.changeFile.completed()
   }
 
 , onOpenFile(filename) {
     getFileByName(getActiveProject(), filename).open = true
     this.trigger(state)
-    ProjectActions.openFile.completed()
+    return ProjectActions.openFile.completed()
   }
 
 , onCloseFile(filename) {
     getFileByName(getActiveProject(), filename).open = false
     this.trigger(state)
-    ProjectActions.closeFile.completed()
+    return ProjectActions.closeFile.completed()
+  }
+
+, onCreateDir: async function(dirname) {
+    let opts = {
+      type: 'arduino'
+    , name: state.activeProjectName
+    , dirs: [dirname]
+    }
+    if (dirExists(getProjectByName(opts.name), dirname))
+      ProjectActions.createDir.failed('Directory already exists')
+    let res = await pm.createDirs(opts)
+    if (res.status !== 0)
+      ProjectActions.createDir.failed(res.content)
+
+    getProjectByName(opts.name).layout = res.content
+    this.trigger(state)
+    return ProjectActions.createDir.completed()
+  }
+
+, onRemoveDir: async function(dir) {
+    let opts = {
+      type: 'arduino'
+    , name: state.activeProjectName
+    , files: [dir]
+    }
+    let res = await pm.deleteFiles(opts)
+    if (res.status !== 0)
+      return ProjectActions.removeDir.failed(res.content)
+
+    let project = getProjectByName(opts.name)
+    project.layout = res.content
+
+    _.remove(project.files, (file) => {
+      return file.path.indexOf(dir) === 0
+    })
+
+    this.trigger(state)
+    return ProjectActions.removeDir.completed()
   }
 })
 

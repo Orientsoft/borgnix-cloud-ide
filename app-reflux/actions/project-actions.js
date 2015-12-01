@@ -12,6 +12,8 @@ let ProjectActions = Reflux.createActions({
 , 'switchFile': {asyncResult: true}
 , 'openFile': {asyncResult: true}
 , 'closeFile': {asyncResult: true}
+, 'createDir': {asyncResult: true}
+, 'removeDir': {asyncResult: true}
 })
 
 export default ProjectActions
