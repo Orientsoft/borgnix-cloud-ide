@@ -1,16 +1,16 @@
 extends layout
 
 block css
-  link(rel='stylesheet' href='vendor/mocha/mocha.css')
+  link(rel='stylesheet' href='/vendor/mocha/mocha.css')
     
 block content
   div#mocha
     
 block js
-  script(src='vendor/babel-polyfill/polyfill.min.js')
-  script(src='vendor/mocha/mocha.js')
+  script(src='/vendor/babel-polyfill/polyfill.min.js')
+  script(src='/vendor/mocha/mocha.js')
   script.
     mocha.setup('bdd')
-  script(src='js/project.js')
+  script(src='/js/#{test}.js')
   script.
     mocha.run()

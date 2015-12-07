@@ -54,8 +54,8 @@ app.use(session({
 
 config.store = new NedbStore('nedb/projects')
 
-var arduino = require('arduino-compiler/lib/router')(config)
-  , projects = require('borgnix-project-manager/lib/router')(config)
+// var arduino = require('arduino-compiler/lib/router')(config)
+var projects = require('borgnix-project-manager/lib/router')(config)
 
 var auth = require('./routes/' + (config.singleUser ? 'single' : 'auth'))
 
@@ -63,7 +63,7 @@ app.use('*', auth)
 app.use('/', routes)
 app.use('/users', users)
 app.use('/p', projects)
-app.use('/c', arduino)
+// app.use('/c', arduino)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

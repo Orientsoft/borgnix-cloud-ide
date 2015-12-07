@@ -7,6 +7,8 @@ import stk500 from 'stk500'
 import BAC from 'arduino-compiler/client'
 import _ from 'lodash'
 import { MQTT_BROKER, AT_CMD } from '../lib/const'
+import utils from '../lib/util'
+import promisify from 'es6-promisify'
 
 let bac = new BAC({
   host: ''
@@ -21,65 +23,80 @@ let state = {
 , uploadPort: ''
 }
 
-function reset(sp, cb) {
-  var timeout = 2000
+let reset = async function (sp) {
+  let t = 1000
   sp.write(AT_CMD.GPIO_1)
-  setTimeout(function () {
-    sp.write(AT_CMD.GPIO_0)
-    setTimeout(function () {
-      sp.write(AT_CMD.GPIO_1)
-      if (_.isFunction(cb)) cb()
-    }, timeout)
-  }, timeout)
+  await utils.sleep(t)
+  sp.write(AT_CMD.GPIO_0)
+  await utils.sleep(t)
+  sp.write(AT_CMD.GPIO_1)
 }
 
-function upload(uuid, token, hexFile, board, cb) {
-  let client = mqtt.connect(
-    MQTT_BROKER
-  , { username: uuid
-    , password: token
-    }
-  )
-  client.on('connect', () => {
-    console.log('mqtt connected')
-    // var topicIn = `/devices/${uuid}/in`
-    //   , topicOut = `/devices/${uuid}/out`
+let _client, _msp
 
-    let msp = new SerialPort({
-      client: client
-    , transmitTopic: `/devices/${uuid}/in`
-    , receiveTopic: `/devices/${uuid}/out`
+let topicOut = '/devices/UUID/out'
+  , topicIn = '/devices/UUID/in'
+
+let getMqttSerial = async function () {
+  if (_msp) {
+    console.log('direct')
+    return _msp
+  }
+
+  if (!_client)
+    _client = mqtt.connect(MQTT_BROKER, {
+      qos: 1
     })
-    let hex = intelHex.parse(hexFile).data
-    let uno = require('arduino-compiler/data/boards').uno
-    let param = {
-      name: 'uno'
-    , baud: parseInt(uno.upload.speed)
-    , signature: new Buffer(uno.signature, 'hex')
-    , pageSize: 128
-    , timeout: 1000
-    }
-    var connected = false
-    msp.on('data', (data) => {
-      if (data.toString() === 'ESP PING_RSP' && !connected) {
-        connected = true
-        console.log('reseted')
-        reset(msp, function () {
-          stk500.bootload(msp, hex, param, function (uploadError) {
-            if (uploadError)
-              console.log('bootload error', uploadError)
-            else {
-              console.log('upload finished')
-              // client.publish('upload/finished')
-              msp.end()
-              if (_.isFunction(cb)) cb()
-            }
-          })
-        })
+
+  await new Promise(function (resolve, reject) {
+    _client.once('connect', resolve)
+    _client.once('error', reject)
+  })
+
+  _msp = new SerialPort({
+    client: _client
+  , transmitTopic: topicOut
+  , receiveTopic: topicIn
+  })
+
+  return _msp
+}
+
+let pingESP = async function (sp) {
+  sp.write(AT_CMD.PING)
+  await new Promise(function (resolve, reject) {
+    sp.once('data', (data) => {
+      if (data.toString() === 'ESP PING_RSP\r\n') {
+        console.log('yes')
+        resolve()
+      }
+      else {
+        console.log('no', data.toString())
+        reject()
       }
     })
-    msp.write(AT_CMD.PING)
   })
+}
+
+let bootload = promisify(stk500.bootload.bind(stk500))
+
+let uploadHex = async function (hexFile, board) {
+  let msp = await getMqttSerial()
+  let hex = intelHex.parse(hexFile).data
+  let uno = require('arduino-compiler/data/boards').uno
+  let param = {
+    name: 'uno'
+  , baud: parseInt(uno.upload.speed)
+  , signature: new Buffer(uno.signature, 'hex')
+  , pageSize: 128
+  , timeout: 2000
+  }
+  await pingESP(msp)
+  console.log('PONG')
+  await reset(msp)
+  console.log('RESETED')
+  await bootload(msp, hex, param)
+  console.log('UPLOAD FINISH')
 }
 
 let arduinoStore = Reflux.createStore({
@@ -115,13 +132,13 @@ let arduinoStore = Reflux.createStore({
     , board: board
     , type: 'arduino'
     }
-    bac.getHex(hexOpts, (err, data)=>{
+    bac.getHex(hexOpts, async (err, data)=>{
       if (!err)
-        upload(state.uuid, state.token, data, board, cb)
+        await uploadHex(data, 'uno')
       else {
         console.log(err)
-        if (_.isFunction(cb)) cb(err)
       }
+      if (_.isFunction(cb)) cb(err)
     })
   }
 
